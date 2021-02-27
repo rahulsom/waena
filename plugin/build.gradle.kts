@@ -1,5 +1,6 @@
 plugins {
     `kotlin-dsl`
+    id("com.gradle.plugin-publish") version "0.12.0"
 }
 
 repositories {
@@ -23,10 +24,14 @@ gradlePlugin {
     val waenaRoot by plugins.creating {
         id = "com.github.rahulsom.waena.root"
         implementationClass = "com.github.rahulsom.waena.WaenaRootPlugin"
+        displayName = "Waena Plugin for Root Modules"
+        description = "Waena Plugin for Root Modules"
     }
     val waenaPublished by plugins.creating {
         id = "com.github.rahulsom.waena.published"
         implementationClass = "com.github.rahulsom.waena.WaenaPublishedPlugin"
+        displayName = "Waena Plugin for Published Modules"
+        description = "Waena Plugin for Published Modules"
     }
 }
 
@@ -44,3 +49,11 @@ val functionalTest by tasks.registering(Test::class) {
 tasks.check {
     dependsOn(functionalTest)
 }
+
+pluginBundle {
+  website = "https://github.com/rahulsom/waena"
+  vcsUrl = "https://github.com/rahulsom/waena.git"
+  tags = listOf("github", "mavencentral")
+}
+
+rootProject.tasks.getByName("final").dependsOn(project.tasks.getByName("publishPlugins"))
