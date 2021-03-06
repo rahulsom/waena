@@ -25,13 +25,13 @@ gradlePlugin {
         id = "com.github.rahulsom.waena.root"
         implementationClass = "com.github.rahulsom.waena.WaenaRootPlugin"
         displayName = "Waena Plugin for Root Modules"
-        description = "Waena Plugin for Root Modules"
+        description = "Configures the root project to publish to Maven Central."
     }
     val waenaPublished by plugins.creating {
         id = "com.github.rahulsom.waena.published"
         implementationClass = "com.github.rahulsom.waena.WaenaPublishedPlugin"
         displayName = "Waena Plugin for Published Modules"
-        description = "Waena Plugin for Published Modules"
+        description = "Marks a module as one to be published to Maven Central."
     }
 }
 
