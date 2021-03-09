@@ -12,7 +12,7 @@ This needs to be applied only to the root project.
 
 ```groovy
 plugins {
-  id("com.github.rahulsom.waena.root").version("<Version>")
+  id("com.github.rahulsom.waena.root").version("0.2.0")
 }
 ```
 
@@ -22,7 +22,7 @@ This needs to be applied to each module in the project that needs to be publishe
 
 ```groovy
 plugins {
-  id("com.github.rahulsom.waena.published").version("<Version>")
+  id("com.github.rahulsom.waena.published")
 }
 ```
 
