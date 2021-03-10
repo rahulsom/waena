@@ -1,5 +1,6 @@
 package com.github.rahulsom.waena
 
+import com.dorongold.gradle.tasktree.TaskTreePlugin
 import de.marcphilipp.gradle.nexus.NexusPublishExtension
 import de.marcphilipp.gradle.nexus.NexusPublishPlugin
 import io.codearte.gradle.nexus.NexusStagingExtension
@@ -24,11 +25,12 @@ class WaenaRootPlugin : Plugin<Project> {
     rootProject.plugins.apply("signing")
     rootProject.plugins.apply(ReleasePlugin::class.java)
     rootProject.plugins.apply(NexusStagingPlugin::class.java)
+    rootProject.plugins.apply(TaskTreePlugin::class.java)
 
     rootProject.extensions.create("waena", WaenaExtension::class.java, rootProject)
 
     rootProject.allprojects.forEach { target ->
-      target.plugins.apply<NexusPublishPlugin>(NexusPublishPlugin::class.java)
+      target.plugins.apply(NexusPublishPlugin::class.java)
       target.plugins.apply(ContactsPlugin::class.java)
 
       target.extensions.getByType<NexusPublishExtension>().apply {
