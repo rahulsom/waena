@@ -47,6 +47,7 @@ class WaenaRootPlugin : Plugin<Project> {
       username = rootProject.findProperty("sonatypeUsername") as String?
       password = rootProject.findProperty("sonatypePassword") as String?
       repositoryDescription = "Release ${rootProject.group} ${rootProject.version}"
+      delayBetweenRetriesInMillis = 30_000
     }
 
     listOf("candidate", "final").forEach {
