@@ -11,13 +11,14 @@ import kotlin.test.assertNotNull
  * A simple unit test for the 'com.github.rahulsom.waena.greeting' plugin.
  */
 class WaenaPluginTest {
-    /*@Test fun `plugin registers task`() {
-        // Create a test project and apply the plugin
-        val project = ProjectBuilder.builder().build()
-        project.plugins.apply("com.github.rahulsom.waena.root")
-        project.plugins.apply("com.github.rahulsom.waena.published")
+  @Test
+  fun `plugin registers task`() {
+    // Create a test project and apply the plugin
+    val project = ProjectBuilder.builder().build()
+    project.plugins.apply(WaenaRootPlugin::class.java)
+    project.plugins.apply(WaenaPublishedPlugin::class.java)
 
-        // Verify the result
-        assertNotNull(project.tasks.findByName("greeting"))
-    }*/
+    // Verify the result
+    assertNotNull(project.tasks.findByName("publishToSonatype"))
+  }
 }

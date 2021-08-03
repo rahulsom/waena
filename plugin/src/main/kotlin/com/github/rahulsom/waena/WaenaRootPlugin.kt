@@ -51,7 +51,7 @@ class WaenaRootPlugin : Plugin<Project> {
     }
 
     listOf("candidate", "final").forEach {
-      rootProject.tasks.getByPath(it).dependsOn("closeAndReleaseRepository")
+      rootProject.tasks.findByPath(it)?.dependsOn("closeAndReleaseRepository")
     }
   }
 
