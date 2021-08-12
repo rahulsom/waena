@@ -52,8 +52,13 @@ class WaenaPublishedPlugin : Plugin<Project> {
     val waenaExtension = target.rootProject.extensions.getByType(WaenaExtension::class.java)
     configurePom(target, waenaExtension)
 
-    target.rootProject.tasks.findByPath("release")?.dependsOn(":${target.name}:publish")
-    target.rootProject.tasks.getByPath("closeRepository").mustRunAfter(":${target.name}:publish")
+    if (target.rootProject == target) {
+      target.rootProject.tasks.findByPath("release")?.dependsOn(":publish")
+      target.rootProject.tasks.getByPath("closeRepository").mustRunAfter(":publish")
+    } else {
+      target.rootProject.tasks.findByPath("release")?.dependsOn(":${target.name}:publish")
+      target.rootProject.tasks.getByPath("closeRepository").mustRunAfter(":${target.name}:publish")
+    }
   }
 
   fun signProject(project: Project) {
