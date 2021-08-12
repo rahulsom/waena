@@ -33,6 +33,8 @@ This needs to be applied to each module in the project that needs to be publishe
 plugins {
   id("com.github.rahulsom.waena.published").version("0.3.0")
 }
+
+description = "TODO"
 ```
 
 ## Usage
