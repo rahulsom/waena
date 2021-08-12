@@ -12,7 +12,16 @@ This needs to be applied only to the root project.
 
 ```groovy
 plugins {
-  id("com.github.rahulsom.waena.root").version("0.2.0")
+  id("com.github.rahulsom.waena.root").version("0.3.0")
+}
+
+contacts {
+    validateEmails = true
+    'rahulsom@noreply.github.com' {
+        moniker("Rahul Somasunderam")
+        roles("owner")
+        github("https://github.com/rahulsom")
+    }
 }
 ```
 
@@ -22,7 +31,7 @@ This needs to be applied to each module in the project that needs to be publishe
 
 ```groovy
 plugins {
-  id("com.github.rahulsom.waena.published")
+  id("com.github.rahulsom.waena.published").version("0.3.0")
 }
 ```
 
