@@ -4,9 +4,10 @@ import de.marcphilipp.gradle.nexus.NexusPublishPlugin
 import nebula.plugin.release.ReleasePlugin
 import nebula.plugin.info.InfoPlugin
 import nebula.plugin.info.scm.ScmInfoPlugin
+import nebula.plugin.publishing.publications.JavadocJarPlugin
+import nebula.plugin.publishing.publications.SourceJarPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
@@ -23,11 +24,8 @@ class WaenaPublishedPlugin : Plugin<Project> {
     target.plugins.apply(ReleasePlugin::class.java)
     target.plugins.apply(NebulaMavenPublishPlugin::class.java)
     target.plugins.apply(InfoPlugin::class.java)
-
-    target.extensions.findByType<JavaPluginExtension>()?.apply {
-      withJavadocJar()
-      withSourcesJar()
-    }
+    target.plugins.apply(JavadocJarPlugin::class.java)
+    target.plugins.apply(SourceJarPlugin::class.java)
 
     val hasSigningKey = target.hasProperty("signing.keyId")
         || target.findProperty("signingKey") != null
