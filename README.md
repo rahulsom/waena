@@ -17,10 +17,10 @@ plugins {
 
 contacts {
     validateEmails = true
-    'rahulsom@noreply.github.com' {
-        moniker("Rahul Somasunderam")
+    'todo@noreply.github.com' {
+        moniker("To Do")
         roles("owner")
-        github("https://github.com/rahulsom")
+        github("https://github.com/todo")
     }
 }
 ```
@@ -35,6 +35,11 @@ plugins {
 }
 
 description = "TODO"
+
+// Optional (to customize license)
+waena {
+    license.set(WaenaExtension.License.Apache2)
+}
 ```
 
 ## Usage
