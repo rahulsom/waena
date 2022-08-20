@@ -109,7 +109,7 @@ class WaenaPublishedPlugin : Plugin<Project> {
 
   private fun getGithubRepoKey(project: Project): String {
     val scmInfoPlugin = project.plugins.getAt(ScmInfoPlugin::class.java)
-    val origin = scmInfoPlugin.findProvider().calculateOrigin(project)
+    val origin = scmInfoPlugin.findProvider(project).calculateOrigin(project)
 
     val matchingRegex = listOf(
       Regex("https://github.com/([^/]+)/([^/]+)"),
