@@ -10,7 +10,7 @@ repositories {
 
 dependencies {
   implementation("com.netflix.nebula:nebula-release-plugin:17.1.0")
-  implementation("com.netflix.nebula:nebula-publishing-plugin:19.0.0")
+  implementation("com.netflix.nebula:nebula-publishing-plugin:19.1.0")
   implementation("com.netflix.nebula:gradle-contacts-plugin:7.0.0")
   implementation("com.netflix.nebula:gradle-info-plugin:12.0.0")
   implementation("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0")
