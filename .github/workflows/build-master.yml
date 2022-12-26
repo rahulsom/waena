@@ -1,16 +1,12 @@
-name: Build PR
+name: Build Master
 
 on:
-  pull_request:
+  push:
     branches: [ master ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        jdk: ['8', '11']
 
     steps:
       - uses: actions/checkout@v3
@@ -32,11 +28,11 @@ jobs:
       - uses: gradle/wrapper-validation-action@v1
         name: Validate Gradle Wrapper
 
-      - name: Set up JDK
+      - name: Set up JDK 1.8
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: ${{ matrix.jdk }}
+          java-version: 8
 
       - name: Build with Gradle
         run: ./gradlew build --stacktrace --parallel --scan
