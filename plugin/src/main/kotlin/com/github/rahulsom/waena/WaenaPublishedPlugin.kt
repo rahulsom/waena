@@ -11,6 +11,7 @@ import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
+import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.plugins.signing.SigningExtension
@@ -56,6 +57,11 @@ class WaenaPublishedPlugin : Plugin<Project> {
     } else {
       target.rootProject.tasks.findByPath("release")?.dependsOn(":${target.name}:publish")
       target.rootProject.tasks.getByPath("closeRepository").mustRunAfter(":${target.name}:publish")
+    }
+
+    target.tasks.withType(AbstractArchiveTask::class.java).configureEach {
+      isPreserveFileTimestamps = false
+      isReproducibleFileOrder = true
     }
   }
 
