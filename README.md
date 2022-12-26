@@ -8,11 +8,13 @@ There are 2 plugins that make up this project.
 
 ### Waena Root
 
+[![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/com.github.rahulsom.waena.root)](https://plugins.gradle.org/plugin/com.github.rahulsom.waena.root)
+
 This needs to be applied only to the root project.
 
 ```groovy
 plugins {
-  id("com.github.rahulsom.waena.root").version("0.3.0")
+  id("com.github.rahulsom.waena.root").version("<VERSION>")
 }
 
 contacts {
@@ -27,11 +29,13 @@ contacts {
 
 ### Waena Published
 
+[![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/com.github.rahulsom.waena.published)](https://plugins.gradle.org/plugin/com.github.rahulsom.waena.published)
+
 This needs to be applied to each module in the project that needs to be published.
 
 ```groovy
 plugins {
-  id("com.github.rahulsom.waena.published").version("0.3.0")
+  id("com.github.rahulsom.waena.published").version("<VERSION>")
 }
 
 description = "TODO"
