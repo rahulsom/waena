@@ -17,6 +17,10 @@ plugins {
   id("com.github.rahulsom.waena.root").version("<VERSION>")
 }
 
+allprojects {
+  group = 'TODO'
+}
+
 contacts {
     validateEmails = true
     'todo@noreply.github.com' {
