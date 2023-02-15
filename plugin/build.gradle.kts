@@ -34,6 +34,8 @@ gradlePlugin {
     displayName = "Waena Plugin for Published Modules"
     description = "Marks a module as one to be published to Maven Central."
   }
+  website.set("https://github.com/rahulsom/waena")
+  vcsUrl.set("https://github.com/rahulsom/waena.git")
 }
 
 val functionalTestSourceSet = sourceSets.create("functionalTest") {
@@ -49,12 +51,6 @@ val functionalTest by tasks.registering(Test::class) {
 
 tasks.check {
   dependsOn(functionalTest)
-}
-
-pluginBundle {
-  website = "https://github.com/rahulsom/waena"
-  vcsUrl = "https://github.com/rahulsom/waena.git"
-  tags = listOf("github", "mavencentral")
 }
 
 rootProject.tasks.getByName("final").dependsOn(project.tasks.getByName("publishPlugins"))
