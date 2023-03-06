@@ -1,3 +1,3 @@
 plugins {
-  id("nebula.release") version "17.1.0"
+  id("nebula.release") version "17.2.0"
 }
