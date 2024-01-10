@@ -9,7 +9,7 @@ repositories {
 }
 
 dependencies {
-  implementation("com.netflix.nebula:nebula-release-plugin:19.0.2")
+  implementation("com.netflix.nebula:nebula-release-plugin:19.0.3")
   implementation("com.netflix.nebula:nebula-publishing-plugin:21.0.0")
   implementation("com.netflix.nebula:gradle-contacts-plugin:7.0.1")
   implementation("com.netflix.nebula:gradle-info-plugin:12.1.6")
