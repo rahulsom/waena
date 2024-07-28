@@ -40,8 +40,8 @@ class WaenaPublishedPlugin : Plugin<Project> {
       repositories {
         maven {
           name = "local"
-          val releasesRepoUrl = "${target.rootProject.buildDir}/repos/releases"
-          val snapshotsRepoUrl = "${target.rootProject.buildDir}/repos/snapshots"
+          val releasesRepoUrl = "${target.rootProject.layout.buildDirectory.get()}/repos/releases"
+          val snapshotsRepoUrl = "${target.rootProject.layout.buildDirectory.get()}/repos/snapshots"
           val repoUrl = if (target.version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
           url = target.file(repoUrl).toURI()
         }
@@ -86,7 +86,7 @@ class WaenaPublishedPlugin : Plugin<Project> {
   private fun configurePom(project: Project, waenaExtension: WaenaExtension) {
     val repoKey = getGithubRepoKey(project)
 
-    project.plugins.withType(MavenPublishPlugin::class.java).forEach {
+    project.plugins.withType(MavenPublishPlugin::class.java).forEach { _ ->
       val publishing = project.extensions.getByType<PublishingExtension>()
       publishing.publications.withType(MavenPublication::class.java).forEach { mavenPublication ->
         mavenPublication.pom {
