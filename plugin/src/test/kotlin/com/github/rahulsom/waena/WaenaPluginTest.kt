@@ -3,9 +3,9 @@
  */
 package com.github.rahulsom.waena
 
+import org.assertj.core.api.Assertions.assertThat
 import org.gradle.testfixtures.ProjectBuilder
 import kotlin.test.Test
-import kotlin.test.assertNotNull
 
 /**
  * A simple unit test for the 'com.github.rahulsom.waena.greeting' plugin.
@@ -19,6 +19,6 @@ class WaenaPluginTest {
     project.plugins.apply(WaenaPublishedPlugin::class.java)
 
     // Verify the result
-    assertNotNull(project.tasks.findByName("publishToSonatype"))
+    assertThat(project.tasks.map { it.name }).contains("publishToSonatype")
   }
 }
