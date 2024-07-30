@@ -19,7 +19,7 @@ dependencies {
 
   testImplementation("org.jetbrains.kotlin:kotlin-test")
   testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
-  testImplementation("org.assertj:assertj-core:3.11.1")
+  testImplementation("org.assertj:assertj-core:3.26.3")
 }
 
 gradlePlugin {
