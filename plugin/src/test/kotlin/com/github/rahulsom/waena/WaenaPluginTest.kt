@@ -19,6 +19,6 @@ class WaenaPluginTest {
     project.plugins.apply(WaenaPublishedPlugin::class.java)
 
     // Verify the result
-    assertThat(project.tasks.map { it.name }).contains("publishToSonatype")
+    assertThat(project.tasks.names).contains("publishToSonatype")
   }
 }
