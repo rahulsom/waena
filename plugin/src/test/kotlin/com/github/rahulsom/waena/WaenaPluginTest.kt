@@ -4,8 +4,9 @@
 package com.github.rahulsom.waena
 
 import org.assertj.core.api.Assertions.assertThat
+import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.testfixtures.ProjectBuilder
-import kotlin.test.Test
+import org.junit.jupiter.api.Test
 
 /**
  * A simple unit test for the 'com.github.rahulsom.waena.greeting' plugin.
@@ -15,10 +16,11 @@ class WaenaPluginTest {
   fun `plugin registers task`() {
     // Create a test project and apply the plugin
     val project = ProjectBuilder.builder().build()
+    project.plugins.apply(JavaLibraryPlugin::class.java)
     project.plugins.apply(WaenaRootPlugin::class.java)
     project.plugins.apply(WaenaPublishedPlugin::class.java)
 
     // Verify the result
-    assertThat(project.tasks.names).contains("publishToSonatype")
+    assertThat(project.tasks.names).contains("closeSonatypeStagingRepository")
   }
 }
