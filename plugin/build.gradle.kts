@@ -15,7 +15,7 @@ dependencies {
   implementation("com.netflix.nebula:gradle-info-plugin:13.1.1")
   implementation("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0")
   implementation("de.marcphilipp.gradle:nexus-publish-plugin:0.4.0")
-  implementation("gradle.plugin.com.dorongold.plugins:task-tree:1.5")
+  implementation("com.dorongold.plugins:task-tree:4.0.0")
 
   testImplementation("org.jetbrains.kotlin:kotlin-test")
   testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
