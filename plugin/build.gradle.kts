@@ -12,7 +12,7 @@ dependencies {
   implementation("com.netflix.nebula:nebula-release-plugin:19.0.10")
   implementation("com.netflix.nebula:nebula-publishing-plugin:21.0.0")
   implementation("com.netflix.nebula:gradle-contacts-plugin:7.0.1")
-  implementation("com.netflix.nebula:gradle-info-plugin:13.1.1")
+  implementation("com.netflix.nebula:gradle-info-plugin:13.1.2")
   implementation("io.github.gradle-nexus:publish-plugin:2.0.0")
   implementation("com.dorongold.plugins:task-tree:4.0.0")
 
