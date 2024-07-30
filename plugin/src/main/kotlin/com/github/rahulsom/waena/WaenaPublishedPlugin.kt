@@ -15,13 +15,14 @@ import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.plugins.signing.SigningExtension
+import org.gradle.plugins.signing.SigningPlugin
 import java.util.*
 import nebula.plugin.publishing.maven.MavenPublishPlugin as NebulaMavenPublishPlugin
 
 class WaenaPublishedPlugin : Plugin<Project> {
   override fun apply(target: Project) {
     target.plugins.apply(NexusPublishPlugin::class.java)
-    target.plugins.apply("signing")
+    target.plugins.apply(SigningPlugin::class.java)
     target.plugins.apply(ReleasePlugin::class.java)
     target.plugins.apply(NebulaMavenPublishPlugin::class.java)
     target.plugins.apply(InfoPlugin::class.java)
