@@ -66,7 +66,7 @@ class WaenaPublishedPlugin : Plugin<Project> {
     }
   }
 
-  fun signProject(project: Project) {
+  private fun signProject(project: Project) {
     project.extensions.findByType<SigningExtension>()?.apply {
       val signingKeyId = project.findProperty("signingKeyId") as String?
       val signingKeyRaw = project.findProperty("signingKey") as String?
@@ -87,10 +87,10 @@ class WaenaPublishedPlugin : Plugin<Project> {
   private fun configurePom(project: Project, waenaExtension: WaenaExtension) {
     val repoKey = getGithubRepoKey(project)
 
-    project.plugins.withType(MavenPublishPlugin::class.java).forEach { _ ->
+    project.plugins.withType(MavenPublishPlugin::class.java).configureEach {
       val publishing = project.extensions.getByType<PublishingExtension>()
-      publishing.publications.withType(MavenPublication::class.java).forEach { mavenPublication ->
-        mavenPublication.pom {
+      publishing.publications.withType(MavenPublication::class.java).configureEach {
+        pom {
           name.set("${project.group}:${project.name}")
           description.set(name)
           url.set("https://github.com/$repoKey")
@@ -123,7 +123,7 @@ class WaenaPublishedPlugin : Plugin<Project> {
       Regex("git@github.com:([^/]+)/([^/]+)\\.git"),
       Regex("https://github.com/([^/]+)/([^/]+)\\.git"),
       Regex("git://github.com/([^/]+)/([^/]+)\\.git")
-      ).find { origin.matches(it) }
+    ).find { origin.matches(it) }
     val message = matchingRegex?.matchEntire(origin)
     val repoKey = message?.let { it.groupValues[1] + "/" + it.groupValues[2] } ?: "rahulsom/nothing"
     return repoKey
