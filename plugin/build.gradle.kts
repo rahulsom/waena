@@ -13,13 +13,13 @@ dependencies {
   implementation("com.netflix.nebula:nebula-publishing-plugin:21.0.0")
   implementation("com.netflix.nebula:gradle-contacts-plugin:7.0.1")
   implementation("com.netflix.nebula:gradle-info-plugin:13.1.1")
-  implementation("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0")
-  implementation("de.marcphilipp.gradle:nexus-publish-plugin:0.4.0")
+  implementation("io.github.gradle-nexus:publish-plugin:2.0.0")
   implementation("com.dorongold.plugins:task-tree:4.0.0")
 
-  testImplementation("org.jetbrains.kotlin:kotlin-test")
-  testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+  testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.2")
   testImplementation("org.assertj:assertj-core:3.26.3")
+  testImplementation("org.eclipse.jgit:org.eclipse.jgit:5.+")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.2")
 }
 
 gradlePlugin {
@@ -41,19 +41,8 @@ gradlePlugin {
   vcsUrl.set("https://github.com/rahulsom/waena.git")
 }
 
-val functionalTestSourceSet = sourceSets.create("functionalTest") {
-}
-
-gradlePlugin.testSourceSets(functionalTestSourceSet)
-configurations["functionalTestImplementation"].extendsFrom(configurations["testImplementation"])
-
-val functionalTest by tasks.registering(Test::class) {
-  testClassesDirs = functionalTestSourceSet.output.classesDirs
-  classpath = functionalTestSourceSet.runtimeClasspath
-}
-
-tasks.check {
-  dependsOn(functionalTest)
-}
-
 rootProject.tasks.getByName("final").dependsOn(project.tasks.getByName("publishPlugins"))
+
+tasks.withType<Test>() {
+  useJUnitPlatform()
+}

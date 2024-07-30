@@ -1,13 +1,15 @@
 package com.github.rahulsom.waena
 
-import de.marcphilipp.gradle.nexus.NexusPublishPlugin
-import nebula.plugin.release.ReleasePlugin
 import nebula.plugin.info.InfoPlugin
 import nebula.plugin.info.scm.ScmInfoPlugin
 import nebula.plugin.publishing.publications.JavadocJarPlugin
 import nebula.plugin.publishing.publications.SourceJarPlugin
+import nebula.plugin.release.ReleasePlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaBasePlugin
+import org.gradle.api.plugins.JavaLibraryPlugin
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
@@ -21,13 +23,15 @@ import nebula.plugin.publishing.maven.MavenPublishPlugin as NebulaMavenPublishPl
 
 class WaenaPublishedPlugin : Plugin<Project> {
   override fun apply(target: Project) {
-    target.plugins.apply(NexusPublishPlugin::class.java)
     target.plugins.apply(SigningPlugin::class.java)
     target.plugins.apply(ReleasePlugin::class.java)
     target.plugins.apply(NebulaMavenPublishPlugin::class.java)
     target.plugins.apply(InfoPlugin::class.java)
-    target.plugins.apply(JavadocJarPlugin::class.java)
-    target.plugins.apply(SourceJarPlugin::class.java)
+    target.plugins.withType(JavaBasePlugin::class.java) {
+      val javaPluginExtension = target.extensions.getByType(JavaPluginExtension::class.java)
+      javaPluginExtension.withJavadocJar()
+      javaPluginExtension.withSourcesJar()
+    }
 
     val hasSigningKey = target.hasProperty("signing.keyId")
         || target.findProperty("signingKey") != null
@@ -41,8 +45,9 @@ class WaenaPublishedPlugin : Plugin<Project> {
       repositories {
         maven {
           name = "local"
-          val releasesRepoUrl = "${target.rootProject.layout.buildDirectory.get()}/repos/releases"
-          val snapshotsRepoUrl = "${target.rootProject.layout.buildDirectory.get()}/repos/snapshots"
+          val rootBuildDir = target.rootProject.layout.buildDirectory.get()
+          val releasesRepoUrl = "$rootBuildDir/repos/releases"
+          val snapshotsRepoUrl = "$rootBuildDir/repos/snapshots"
           val repoUrl = if (target.version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
           url = target.file(repoUrl).toURI()
         }
@@ -54,10 +59,10 @@ class WaenaPublishedPlugin : Plugin<Project> {
 
     if (target.rootProject == target) {
       target.rootProject.tasks.findByPath("release")?.dependsOn(":publish")
-      target.rootProject.tasks.getByPath("closeRepository").mustRunAfter(":publish")
+      target.rootProject.tasks.getByPath("closeSonatypeStagingRepository").mustRunAfter(":publish")
     } else {
       target.rootProject.tasks.findByPath("release")?.dependsOn(":${target.name}:publish")
-      target.rootProject.tasks.getByPath("closeRepository").mustRunAfter(":${target.name}:publish")
+      target.rootProject.tasks.getByPath("closeSonatypeStagingRepository").mustRunAfter(":${target.name}:publish")
     }
 
     target.tasks.withType(AbstractArchiveTask::class.java).configureEach {
