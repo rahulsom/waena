@@ -1,3 +1,3 @@
 plugins {
-  id("nebula.release") version "19.0.10"
+  alias(libs.plugins.nebulaRelease)
 }
