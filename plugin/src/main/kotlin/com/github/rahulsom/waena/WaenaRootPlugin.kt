@@ -28,7 +28,6 @@ class WaenaRootPlugin : Plugin<Project> {
     rootProject.extensions.create("waena", WaenaExtension::class.java, rootProject)
 
     rootProject.allprojects.forEach { target ->
-      target.plugins.apply(NexusPublishPlugin::class.java)
       target.plugins.apply(ContactsPlugin::class.java)
     }
 
