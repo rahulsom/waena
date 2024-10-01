@@ -33,7 +33,12 @@ class WaenaRootPlugin : Plugin<Project> {
 
     rootProject.extensions.getByType<NexusPublishExtension>().apply {
       repositories {
-        sonatype()
+        sonatype {
+          if (rootProject.group.toString().startsWith("io.github")) {
+            nexusUrl.set(rootProject.uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(rootProject.uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+          }
+        }
       }
 
       connectTimeout.set(Duration.ofMinutes(3))
