@@ -18,3 +18,7 @@ ij_wrap_on_typing = false
 
 [*.yml]
 indent_size = 2
+
+[*.kt]
+indent_size = 2
+ij_continuation_indent_size = 4
