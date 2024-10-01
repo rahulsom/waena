@@ -9,6 +9,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.getByType
+import org.gradle.plugins.signing.SigningPlugin
 import java.time.Duration
 
 class WaenaRootPlugin : Plugin<Project> {
@@ -20,12 +21,12 @@ class WaenaRootPlugin : Plugin<Project> {
   }
 
   private fun configureRootProject(rootProject: Project) {
-    rootProject.plugins.apply("signing")
+    rootProject.plugins.apply(SigningPlugin::class.java)
     rootProject.plugins.apply(ReleasePlugin::class.java)
     rootProject.plugins.apply(NexusPublishPlugin::class.java)
     rootProject.plugins.apply(TaskTreePlugin::class.java)
 
-    rootProject.extensions.create("waena", WaenaExtension::class.java, rootProject)
+    val waenaExtension = rootProject.extensions.create("waena", WaenaExtension::class.java, rootProject)
 
     rootProject.allprojects.forEach { target ->
       target.plugins.apply(ContactsPlugin::class.java)
@@ -34,7 +35,7 @@ class WaenaRootPlugin : Plugin<Project> {
     rootProject.extensions.getByType<NexusPublishExtension>().apply {
       repositories {
         sonatype {
-          if (rootProject.group.toString().startsWith("io.github")) {
+          if (waenaExtension.useCentralPortal.get()) {
             nexusUrl.set(rootProject.uri("https://s01.oss.sonatype.org/service/local/"))
             snapshotRepositoryUrl.set(rootProject.uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
           }
