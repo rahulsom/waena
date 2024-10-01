@@ -15,38 +15,44 @@ import java.io.File
  * A simple functional test for the 'com.github.rahulsom.waena.greeting' plugin.
  */
 class WaenaPluginFunctionalTest {
-    @Test
-    fun `can run task`(@TempDir projectDir: File) {
-        // Setup the test build
-        Git.init().setDirectory(projectDir).call()
-        val git = Git.open(projectDir)
-        git.repository.config.setString("user", null, "name", "John Doe")
-        git.repository.config.setString("user", null, "email", "john.doe@example.com")
-        projectDir.mkdirs()
-        projectDir.resolve("settings.gradle").writeText("")
-        projectDir.resolve("build.gradle").writeText("""
+
+  @Test
+  fun `can run task`(@TempDir projectDir: File) {
+    // Setup the test build
+    Git.init().setDirectory(projectDir).call()
+    val git = Git.open(projectDir)
+    git.repository.config.setString("user", null, "name", "John Doe")
+    git.repository.config.setString("user", null, "email", "john.doe@example.com")
+    projectDir.mkdirs()
+    projectDir.resolve("settings.gradle").writeText("")
+    projectDir.resolve("build.gradle").writeText(
+      // language=groovy
+      """
             plugins {
                 id('com.github.rahulsom.waena.root')
                 id('com.github.rahulsom.waena.published')
             }
-        """)
-        projectDir.resolve(".gitignore").writeText("""
+        """
+    )
+    projectDir.resolve(".gitignore").writeText(
+      """
             build/
             .gradle/
-        """.trimIndent())
-        git.add().addFilepattern(".").call()
-        git.commit().setMessage("Initial commit").call()
-        git.remoteAdd().setName("origin").setUri(URIish("https://github.com/rahulsom/nothing.git")).call()
+        """.trimIndent()
+    )
+    git.add().addFilepattern(".").call()
+    git.commit().setMessage("Initial commit").call()
+    git.remoteAdd().setName("origin").setUri(URIish("https://github.com/rahulsom/nothing.git")).call()
 
-        // Run the build
-        val runner = GradleRunner.create()
-        runner.forwardOutput()
-        runner.withPluginClasspath()
-        runner.withArguments("final", "taskTree")
-        runner.withProjectDir(projectDir)
-        val result = runner.build();
+    // Run the build
+    val runner = GradleRunner.create()
+    runner.forwardOutput()
+    runner.withPluginClasspath()
+    runner.withArguments("final", "taskTree")
+    runner.withProjectDir(projectDir)
+    val result = runner.build()
 
-        // Verify the result
-        assertThat(result.output).contains("publishNebulaPublicationToSonatypeRepository")
-    }
+    // Verify the result
+    assertThat(result.output).contains("publishNebulaPublicationToSonatypeRepository")
+  }
 }

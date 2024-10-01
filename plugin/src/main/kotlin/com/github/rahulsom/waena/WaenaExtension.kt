@@ -4,6 +4,7 @@ import org.gradle.api.Project
 import org.gradle.api.provider.Property
 
 open class WaenaExtension(project: Project) {
+  @Suppress("unused")
   enum class License(val license: String, val url: String) {
     Apache2("The Apache License, Version 2.0", "https://opensource.org/licenses/Apache-2.0"),
     BSD3("The 3-Clause BSD License", "https://opensource.org/licenses/BSD-3-Clause"),
@@ -20,5 +21,8 @@ open class WaenaExtension(project: Project) {
   }
   var license: Property<License> = project.objects.property(License::class.java).apply {
     set(License.Apache2)
+  }
+  var useCentralPortal: Property<Boolean> = project.objects.property(Boolean::class.java).apply {
+    set(false)
   }
 }
