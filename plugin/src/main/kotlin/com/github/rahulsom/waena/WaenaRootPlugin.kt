@@ -8,8 +8,12 @@ import nebula.plugin.release.ReleasePlugin
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.internal.provider.DefaultProviderFactory
+import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.plugins.signing.SigningPlugin
+import java.net.URI
 import java.time.Duration
 
 class WaenaRootPlugin : Plugin<Project> {
@@ -35,10 +39,8 @@ class WaenaRootPlugin : Plugin<Project> {
     rootProject.extensions.getByType<NexusPublishExtension>().apply {
       repositories {
         sonatype {
-          if (waenaExtension.useCentralPortal.get()) {
-            nexusUrl.set(rootProject.uri("https://s01.oss.sonatype.org/service/local/"))
-            snapshotRepositoryUrl.set(rootProject.uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-          }
+          nexusUrl.value(buildUriProvider(waenaExtension.useCentralPortal, "service/local/"))
+          snapshotRepositoryUrl.value(buildUriProvider(waenaExtension.useCentralPortal, "content/repositories/snapshots/"))
         }
       }
 
@@ -53,6 +55,12 @@ class WaenaRootPlugin : Plugin<Project> {
     listOf("candidate", "final").forEach {
       rootProject.tasks.findByPath(it)?.dependsOn("closeAndReleaseSonatypeStagingRepository")
     }
+  }
+
+  private fun buildUriProvider(useCentralPortal: Property<Boolean>, path: String): Provider<out URI> {
+    return DefaultProviderFactory().provider({
+      if (useCentralPortal.get()) URI("https://s01.oss.sonatype.org/$path") else URI("https://oss.sonatype.org/$path")
+    })
   }
 
 }
