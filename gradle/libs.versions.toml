@@ -1,6 +1,6 @@
 [versions]
 assertJ = "3.26.3"
-gradleInfo = "13.1.2"
+gradleInfo = "13.2.0"
 gradlePublish = "1.3.0"
 jgit = "5.+"
 junit = "5.11.1"
