@@ -36,11 +36,18 @@ class WaenaRootPlugin : Plugin<Project> {
       target.plugins.apply(ContactsPlugin::class.java)
     }
 
-    rootProject.extensions.getByType<NexusPublishExtension>().apply {
+    val nexusPublishExtension = rootProject.extensions.getByType<NexusPublishExtension>()
+    nexusPublishExtension.apply {
       repositories {
         sonatype {
-          nexusUrl.value(buildUriProvider(waenaExtension.useCentralPortal, "service/local/"))
-          snapshotRepositoryUrl.value(buildUriProvider(waenaExtension.useCentralPortal, "content/repositories/snapshots/"))
+          nexusUrl.set(buildUriProvider(waenaExtension.useCentralPortal, false))
+          snapshotRepositoryUrl.set(buildUriProvider(waenaExtension.useCentralPortal, true))
+          if (rootProject.hasProperty("sonatypeUsername")) {
+            username.convention(rootProject.property("sonatypeUsername") as String)
+          }
+          if (rootProject.hasProperty("sonatypePassword")) {
+            password.convention(rootProject.property("sonatypePassword") as String)
+          }
         }
       }
 
@@ -57,9 +64,17 @@ class WaenaRootPlugin : Plugin<Project> {
     }
   }
 
-  private fun buildUriProvider(useCentralPortal: Property<Boolean>, path: String): Provider<out URI> {
+  fun buildUriProvider(useCentralPortal: Property<Boolean>, isSnapshot: Boolean): Provider<URI> {
     return DefaultProviderFactory().provider({
-      if (useCentralPortal.get()) URI("https://s01.oss.sonatype.org/$path") else URI("https://oss.sonatype.org/$path")
+      val input = Pair(useCentralPortal.get(), isSnapshot)
+      val retval = when (input) {
+        Pair(true, true) -> URI("https://central.sonatype.com/repository/maven-snapshots/")
+        Pair(true, false) -> URI("https://s01.sonatype.org/service/local/")
+        Pair(false, true) -> URI("https://oss.sonatype.org/content/repositories/snapshots/")
+        Pair(false, false) -> URI("https://oss.sonatype.org/service/local/")
+        else -> throw IllegalStateException("Invalid combination of useCentralPortal and isSnapshot")
+      }
+      retval
     })
   }
 

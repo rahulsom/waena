@@ -19,10 +19,12 @@ open class WaenaExtension(project: Project) {
     CDDL1("Common Development and Distribution License 1.0", "https://opensource.org/licenses/CDDL-1.0"),
     EPL2("Eclipse Public License version 2.0", "https://opensource.org/licenses/EPL-2.0"),
   }
+
   var license: Property<License> = project.objects.property(License::class.java).apply {
-    set(License.Apache2)
+    convention(License.Apache2)
   }
+
   var useCentralPortal: Property<Boolean> = project.objects.property(Boolean::class.java).apply {
-    set(false)
+    convention(false)
   }
 }
