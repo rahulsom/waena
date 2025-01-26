@@ -32,6 +32,7 @@ class WaenaPluginFunctionalTest {
       projectDir.resolve("build.gradle").writeText(
         // language=groovy
         """
+            import groovy.json.JsonBuilder
             plugins {
                 id('com.github.rahulsom.waena.root')
                 id('com.github.rahulsom.waena.published')
@@ -39,7 +40,10 @@ class WaenaPluginFunctionalTest {
             
             task('showconfig') {
               doLast {
-                println(nexusPublishing.repositories.getByName('sonatype').nexusUrl.get())
+                println(new JsonBuilder([
+                  nexusUrl: nexusPublishing.repositories.getByName('sonatype').nexusUrl.get().toString(),
+                  snapshotRepositoryUrl: nexusPublishing.repositories.getByName('sonatype').snapshotRepositoryUrl.get().toString()
+                ]))
               }
             }
         """
@@ -66,15 +70,10 @@ class WaenaPluginFunctionalTest {
       assertThat(result.output).contains("publishNebulaPublicationToSonatypeRepository")
 
       // Run showconfig
-      val showConfigRunner = GradleRunner.create()
-      showConfigRunner.forwardOutput()
-      showConfigRunner.withPluginClasspath()
-      showConfigRunner.withArguments("showconfig")
-      showConfigRunner.withProjectDir(projectDir)
-      val showConfigResult = showConfigRunner.build()
+      val showConfigResult = showConfig(projectDir)
 
       // Verify the result
-      assertThat(showConfigResult.output).contains("https://oss.sonatype.org/service/local/")
+      assertThat(showConfigResult).isEqualTo("""{"nexusUrl":"https://oss.sonatype.org/service/local/","snapshotRepositoryUrl":"https://oss.sonatype.org/content/repositories/snapshots/"}""")
     }
   }
 
@@ -93,6 +92,7 @@ class WaenaPluginFunctionalTest {
       projectDir.resolve("build.gradle").writeText(
         // language=groovy
         """
+            import groovy.json.JsonBuilder
             plugins {
                 id('com.github.rahulsom.waena.root')
                 id('com.github.rahulsom.waena.published')
@@ -104,7 +104,10 @@ class WaenaPluginFunctionalTest {
             
             task('showconfig') {
               doLast {
-                println(nexusPublishing.repositories.getByName('sonatype').nexusUrl.get())
+                println(new JsonBuilder([
+                  nexusUrl: nexusPublishing.repositories.getByName('sonatype').nexusUrl.get().toString(),
+                  snapshotRepositoryUrl: nexusPublishing.repositories.getByName('sonatype').snapshotRepositoryUrl.get().toString()
+                ]))
               }
             }
         """
@@ -132,16 +135,20 @@ class WaenaPluginFunctionalTest {
 
 
       // Run showconfig
-      val showConfigRunner = GradleRunner.create()
-      showConfigRunner.forwardOutput()
-      showConfigRunner.withPluginClasspath()
-      showConfigRunner.withArguments("showconfig")
-      showConfigRunner.withProjectDir(projectDir)
-      val showConfigResult = showConfigRunner.build()
+      val showConfigResult = showConfig(projectDir)
 
       // Verify the result
-      assertThat(showConfigResult.output).contains("https://s01.oss.sonatype.org/service/local/")
-
+      assertThat(showConfigResult).isEqualTo("""{"nexusUrl":"https://s01.sonatype.org/service/local/","snapshotRepositoryUrl":"https://central.sonatype.com/repository/maven-snapshots/"}""")
     }
+  }
+
+  private fun showConfig(projectDir: File): String? {
+    val showConfigRunner = GradleRunner.create()
+    showConfigRunner.forwardOutput()
+    showConfigRunner.withPluginClasspath()
+    showConfigRunner.withArguments("showconfig")
+    showConfigRunner.withProjectDir(projectDir)
+    val showConfigResult = showConfigRunner.build().output
+    return showConfigResult.split("\n").first { it -> it.contains("snapshotRepositoryUrl") }
   }
 }
