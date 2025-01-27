@@ -69,7 +69,7 @@ class WaenaRootPlugin : Plugin<Project> {
       val input = Pair(useCentralPortal.get(), isSnapshot)
       val retval = when (input) {
         Pair(true, true) -> URI("https://central.sonatype.com/repository/maven-snapshots/")
-        Pair(true, false) -> URI("https://s01.sonatype.org/service/local/")
+        Pair(true, false) -> URI("https://s01.oss.sonatype.org/service/local/")
         Pair(false, true) -> URI("https://oss.sonatype.org/content/repositories/snapshots/")
         Pair(false, false) -> URI("https://oss.sonatype.org/service/local/")
         else -> throw IllegalStateException("Invalid combination of useCentralPortal and isSnapshot")
