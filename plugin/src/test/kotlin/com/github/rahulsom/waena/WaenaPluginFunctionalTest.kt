@@ -73,7 +73,7 @@ class WaenaPluginFunctionalTest {
       val showConfigResult = showConfig(projectDir)
 
       // Verify the result
-      assertThat(showConfigResult).isEqualTo("""{"nexusUrl":"https://oss.sonatype.org/service/local/","snapshotRepositoryUrl":"https://oss.sonatype.org/content/repositories/snapshots/"}""")
+      assertThat(showConfigResult).isEqualTo("""{"nexusUrl":"${WaenaRootPlugin.OSSRH_RELEASES}","snapshotRepositoryUrl":"${WaenaRootPlugin.OSSRH_SNAPSHOTS}"}""")
     }
   }
 
@@ -138,7 +138,7 @@ class WaenaPluginFunctionalTest {
       val showConfigResult = showConfig(projectDir)
 
       // Verify the result
-      assertThat(showConfigResult).isEqualTo("""{"nexusUrl":"https://s01.oss.sonatype.org/service/local/","snapshotRepositoryUrl":"https://s01.oss.sonatype.org/content/repositories/snapshots/"}""")
+      assertThat(showConfigResult).isEqualTo("""{"nexusUrl":"${WaenaRootPlugin.NEW_RELEASES}","snapshotRepositoryUrl":"${WaenaRootPlugin.NEW_SNAPSHOTS}"}""")
     }
   }
 
