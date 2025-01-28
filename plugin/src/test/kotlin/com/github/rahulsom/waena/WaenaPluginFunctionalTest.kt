@@ -7,6 +7,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.transport.URIish
 import org.gradle.testkit.runner.GradleRunner
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -73,7 +74,7 @@ class WaenaPluginFunctionalTest {
       val showConfigResult = showConfig(projectDir)
 
       // Verify the result
-      assertThat(showConfigResult).isEqualTo("""{"nexusUrl":"${WaenaRootPlugin.OSSRH_RELEASES}","snapshotRepositoryUrl":"${WaenaRootPlugin.OSSRH_SNAPSHOTS}"}""")
+      assertThat(showConfigResult).isEqualTo("""{"nexusUrl":"${WaenaRootPlugin.OSS.second}","snapshotRepositoryUrl":"${WaenaRootPlugin.OSS.first}"}""")
     }
   }
 
@@ -92,6 +93,7 @@ class WaenaPluginFunctionalTest {
       projectDir.resolve("build.gradle").writeText(
         // language=groovy
         """
+            import com.github.rahulsom.waena.WaenaExtension
             import groovy.json.JsonBuilder
             plugins {
                 id('com.github.rahulsom.waena.root')
@@ -99,7 +101,7 @@ class WaenaPluginFunctionalTest {
             }
             
             waena {
-                useCentralPortal.set(true)
+                repositoryConfig.set(WaenaExtension.PublishMode.Central)
             }
             
             task('showconfig') {
@@ -138,7 +140,78 @@ class WaenaPluginFunctionalTest {
       val showConfigResult = showConfig(projectDir)
 
       // Verify the result
-      assertThat(showConfigResult).isEqualTo("""{"nexusUrl":"${WaenaRootPlugin.NEW_RELEASES}","snapshotRepositoryUrl":"${WaenaRootPlugin.NEW_SNAPSHOTS}"}""")
+      assertThat(showConfigResult).isEqualTo("""{"nexusUrl":"${WaenaRootPlugin.CENTRAL.second}","snapshotRepositoryUrl":"${WaenaRootPlugin.CENTRAL.first}"}""")
+    }
+  }
+
+  @Nested
+  @Disabled("This needs to be fixed.")
+  inner class WithOverride {
+
+    @Test
+    fun `can run task`(@TempDir projectDir: File) {
+      // Setup the test build
+      Git.init().setDirectory(projectDir).call()
+      val git = Git.open(projectDir)
+      git.repository.config.setString("user", null, "name", "John Doe")
+      git.repository.config.setString("user", null, "email", "john.doe@example.com")
+      projectDir.mkdirs()
+      projectDir.resolve("settings.gradle").writeText("")
+      projectDir.resolve("build.gradle").writeText(
+        // language=groovy
+        """
+            import groovy.json.JsonBuilder
+            plugins {
+                id('com.github.rahulsom.waena.root')
+                id('com.github.rahulsom.waena.published')
+            }
+            
+            nexusPublishing {
+              repositories {
+                sonatype {
+                  snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+                  nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"))
+                }
+              }
+            }
+            
+            task('showconfig') {
+              doLast {
+                println(new JsonBuilder([
+                  nexusUrl: nexusPublishing.repositories.getByName('sonatype').nexusUrl.get().toString(),
+                  snapshotRepositoryUrl: nexusPublishing.repositories.getByName('sonatype').snapshotRepositoryUrl.get().toString()
+                ]))
+              }
+            }
+        """
+      )
+      projectDir.resolve(".gitignore").writeText(
+        """
+            build/
+            .gradle/
+        """.trimIndent()
+      )
+      git.add().addFilepattern(".").call()
+      git.commit().setMessage("Initial commit").call()
+      git.remoteAdd().setName("origin").setUri(URIish("https://github.com/rahulsom/nothing.git")).call()
+
+      // Run the build
+      val runner = GradleRunner.create()
+      runner.forwardOutput()
+      runner.withPluginClasspath()
+      runner.withArguments("final", "taskTree")
+      runner.withProjectDir(projectDir)
+      val result = runner.build()
+
+      // Verify the result
+      assertThat(result.output).contains("publishNebulaPublicationToSonatypeRepository")
+
+
+      // Run showconfig
+      val showConfigResult = showConfig(projectDir)
+
+      // Verify the result
+      assertThat(showConfigResult).isEqualTo("""{"nexusUrl":"${WaenaRootPlugin.CENTRAL.second}","snapshotRepositoryUrl":"${WaenaRootPlugin.CENTRAL.first}"}""")
     }
   }
 

@@ -8,22 +8,18 @@ import nebula.plugin.release.ReleasePlugin
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.internal.provider.DefaultProviderFactory
-import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
+import org.gradle.api.internal.provider.DefaultProvider
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.plugins.signing.SigningPlugin
-import java.net.URI
 import java.time.Duration
 
 
 class WaenaRootPlugin : Plugin<Project> {
 
   companion object {
-    const val NEW_SNAPSHOTS = "https://central.sonatype.com/repository/maven-snapshots/"
-    const val NEW_RELEASES = "https://central.sonatype.com/service/local/"
-    const val OSSRH_SNAPSHOTS = "https://oss.sonatype.org/content/repositories/snapshots/"
-    const val OSSRH_RELEASES = "https://oss.sonatype.org/service/local/"
+    val CENTRAL = Pair("https://central.sonatype.com/repository/maven-snapshots/", "https://central.sonatype.com/service/local/")
+    val OSS = Pair("https://oss.sonatype.org/content/repositories/snapshots/", "https://oss.sonatype.org/service/local/")
+    val S01 = Pair("https://s01.oss.sonatype.org/content/repositories/snapshots/", "https://s01.oss.sonatype.org/service/local/")
   }
 
   override fun apply(target: Project) {
@@ -46,45 +42,39 @@ class WaenaRootPlugin : Plugin<Project> {
     }
 
     val nexusPublishExtension = rootProject.extensions.getByType<NexusPublishExtension>()
+
     nexusPublishExtension.apply {
       repositories {
-        sonatype {
-          nexusUrl.set(buildUriProvider(waenaExtension.useCentralPortal, false))
-          snapshotRepositoryUrl.set(buildUriProvider(waenaExtension.useCentralPortal, true))
+        val s = repositories.find { it.name == "sonatype" } ?: repositories.create("sonatype")
+        s.apply {
+          nexusUrl.unsetConvention().convention(provideUrls(waenaExtension).map { rootProject.uri(it.second) })
+          snapshotRepositoryUrl.unsetConvention().convention(provideUrls(waenaExtension).map { rootProject.uri(it.first) })
           if (rootProject.hasProperty("sonatypeUsername")) {
-            username.convention(rootProject.property("sonatypeUsername") as String)
+            username.unsetConvention().convention(rootProject.property("sonatypeUsername") as String)
           }
           if (rootProject.hasProperty("sonatypePassword")) {
-            password.convention(rootProject.property("sonatypePassword") as String)
+            password.unsetConvention().convention(rootProject.property("sonatypePassword") as String)
           }
         }
       }
 
-      connectTimeout.set(Duration.ofMinutes(3))
-      clientTimeout.set(Duration.ofMinutes(3))
-
-      transitionCheckOptions {
-        delayBetween.set(Duration.ofSeconds(30))
-      }
+      connectTimeout.unsetConvention().convention(Duration.ofMinutes(3))
+      clientTimeout.unsetConvention().convention(Duration.ofMinutes(3))
+      transitionCheckOptions.delayBetween.unsetConvention().convention(Duration.ofSeconds(30))
     }
 
     listOf("candidate", "final").forEach {
       rootProject.tasks.findByPath(it)?.dependsOn("closeAndReleaseSonatypeStagingRepository")
     }
+
   }
 
-  private fun buildUriProvider(useCentralPortal: Property<Boolean>, isSnapshot: Boolean): Provider<URI> {
-    return DefaultProviderFactory().provider({
-      val input = Pair(useCentralPortal.get(), isSnapshot)
-      val retval = when (input) {
-        Pair(true, true) -> URI(NEW_SNAPSHOTS)
-        Pair(true, false) -> URI(NEW_RELEASES)
-        Pair(false, true) -> URI(OSSRH_SNAPSHOTS)
-        Pair(false, false) -> URI(OSSRH_RELEASES)
-        else -> throw IllegalStateException("Invalid combination of useCentralPortal and isSnapshot")
-      }
-      retval
-    })
-  }
+  fun provideUrls(extension: WaenaExtension) = DefaultProvider({
+    when (extension.repositoryConfig.get()) {
+      WaenaExtension.PublishMode.OSS -> OSS
+      WaenaExtension.PublishMode.Central -> CENTRAL
+      WaenaExtension.PublishMode.S01 -> S01
+    }
+  })
 
 }

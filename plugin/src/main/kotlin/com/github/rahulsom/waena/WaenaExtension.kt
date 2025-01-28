@@ -20,11 +20,12 @@ open class WaenaExtension(project: Project) {
     EPL2("Eclipse Public License version 2.0", "https://opensource.org/licenses/EPL-2.0"),
   }
 
-  var license: Property<License> = project.objects.property(License::class.java).apply {
-    convention(License.Apache2)
+  enum class PublishMode {
+    OSS,
+    Central,
+    S01
   }
 
-  var useCentralPortal: Property<Boolean> = project.objects.property(Boolean::class.java).apply {
-    convention(false)
-  }
+  var license: Property<License> = project.objects.property(License::class.java).convention(License.Apache2)
+  var repositoryConfig: Property<PublishMode> = project.objects.property(PublishMode::class.java).convention(PublishMode.OSS)
 }
