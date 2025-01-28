@@ -64,11 +64,11 @@ class WaenaRootPlugin : Plugin<Project> {
     }
   }
 
-  fun buildUriProvider(useCentralPortal: Property<Boolean>, isSnapshot: Boolean): Provider<URI> {
+  private fun buildUriProvider(useCentralPortal: Property<Boolean>, isSnapshot: Boolean): Provider<URI> {
     return DefaultProviderFactory().provider({
       val input = Pair(useCentralPortal.get(), isSnapshot)
       val retval = when (input) {
-        Pair(true, true) -> URI("https://central.sonatype.com/repository/maven-snapshots/")
+        Pair(true, true) -> URI("https://s01.oss.sonatype.org/content/repositories/snapshots/")
         Pair(true, false) -> URI("https://s01.oss.sonatype.org/service/local/")
         Pair(false, true) -> URI("https://oss.sonatype.org/content/repositories/snapshots/")
         Pair(false, false) -> URI("https://oss.sonatype.org/service/local/")
