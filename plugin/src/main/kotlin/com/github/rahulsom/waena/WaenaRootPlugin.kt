@@ -16,7 +16,16 @@ import org.gradle.plugins.signing.SigningPlugin
 import java.net.URI
 import java.time.Duration
 
+
 class WaenaRootPlugin : Plugin<Project> {
+
+  companion object {
+    const val NEW_SNAPSHOTS = "https://central.sonatype.com/repository/maven-snapshots/"
+    const val NEW_RELEASES = "https://central.sonatype.com/service/local/"
+    const val OSSRH_SNAPSHOTS = "https://oss.sonatype.org/content/repositories/snapshots/"
+    const val OSSRH_RELEASES = "https://oss.sonatype.org/service/local/"
+  }
+
   override fun apply(target: Project) {
     if (target.rootProject != target) {
       throw GradleException("WaenaRoot can only be applied to a root project")
@@ -68,10 +77,10 @@ class WaenaRootPlugin : Plugin<Project> {
     return DefaultProviderFactory().provider({
       val input = Pair(useCentralPortal.get(), isSnapshot)
       val retval = when (input) {
-        Pair(true, true) -> URI("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-        Pair(true, false) -> URI("https://s01.oss.sonatype.org/service/local/")
-        Pair(false, true) -> URI("https://oss.sonatype.org/content/repositories/snapshots/")
-        Pair(false, false) -> URI("https://oss.sonatype.org/service/local/")
+        Pair(true, true) -> URI(NEW_SNAPSHOTS)
+        Pair(true, false) -> URI(NEW_RELEASES)
+        Pair(false, true) -> URI(OSSRH_SNAPSHOTS)
+        Pair(false, false) -> URI(OSSRH_RELEASES)
         else -> throw IllegalStateException("Invalid combination of useCentralPortal and isSnapshot")
       }
       retval
