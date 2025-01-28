@@ -138,7 +138,7 @@ class WaenaPluginFunctionalTest {
       val showConfigResult = showConfig(projectDir)
 
       // Verify the result
-      assertThat(showConfigResult).isEqualTo("""{"nexusUrl":"https://s01.oss.sonatype.org/service/local/","snapshotRepositoryUrl":"https://central.sonatype.com/repository/maven-snapshots/"}""")
+      assertThat(showConfigResult).isEqualTo("""{"nexusUrl":"https://s01.oss.sonatype.org/service/local/","snapshotRepositoryUrl":"https://s01.oss.sonatype.org/content/repositories/snapshots/"}""")
     }
   }
 
