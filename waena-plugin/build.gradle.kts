@@ -16,11 +16,9 @@ dependencies {
   implementation(libs.nexusPublish)
   implementation(libs.taskTree)
 
-  testImplementation(libs.junitApi)
+  testImplementation(libs.bundles.junit)
   testImplementation(libs.assertJ)
   testImplementation(libs.jgit)
-
-  testRuntimeOnly(libs.junitJupiter)
 }
 
 gradlePlugin {

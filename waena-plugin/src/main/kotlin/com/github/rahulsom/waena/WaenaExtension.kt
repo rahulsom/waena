@@ -26,6 +26,11 @@ open class WaenaExtension(project: Project) {
     S01
   }
 
-  var license: Property<License> = project.objects.property(License::class.java).convention(License.Apache2)
-  var repositoryConfig: Property<PublishMode> = project.objects.property(PublishMode::class.java).convention(PublishMode.OSS)
+  var license: Property<License> = project.objects
+    .property(License::class.java)
+    .convention(License.Apache2)
+
+  var repositoryConfig: Property<PublishMode> = project.objects
+    .property(PublishMode::class.java)
+    .convention(PublishMode.OSS)
 }
