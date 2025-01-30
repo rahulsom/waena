@@ -16,4 +16,4 @@ develocity {
 }
 
 rootProject.name = "waena"
-include("plugin")
+include("waena-plugin")
