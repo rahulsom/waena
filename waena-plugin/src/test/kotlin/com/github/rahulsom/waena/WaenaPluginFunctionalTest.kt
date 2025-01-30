@@ -11,99 +11,28 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import java.io.File
+import java.util.stream.Stream
 
 /**
  * A simple functional test for the 'com.github.rahulsom.waena.greeting' plugin.
  */
 class WaenaPluginFunctionalTest {
 
-  @Nested
-  inner class Simple {
-
-    @Test
-    fun `can run task`(@TempDir projectDir: File) {
-      // Setup the test build
-      Git.init().setDirectory(projectDir).call()
-      val git = Git.open(projectDir)
-      git.repository.config.setString("user", null, "name", "John Doe")
-      git.repository.config.setString("user", null, "email", "john.doe@example.com")
-      projectDir.mkdirs()
-      projectDir.resolve("settings.gradle").writeText("")
-      projectDir.resolve("build.gradle").writeText(
-        // language=groovy
-        """
-            import groovy.json.JsonBuilder
-            plugins {
-                id('com.github.rahulsom.waena.root')
-                id('com.github.rahulsom.waena.published')
-            }
-            
-            task('showconfig') {
-              doLast {
-                println(new JsonBuilder([
-                  nexusUrl: nexusPublishing.repositories.getByName('sonatype').nexusUrl.get().toString(),
-                  snapshotRepositoryUrl: nexusPublishing.repositories.getByName('sonatype').snapshotRepositoryUrl.get().toString()
-                ]))
-              }
-            }
-        """
-      )
-      projectDir.resolve(".gitignore").writeText(
-        """
-            build/
-            .gradle/
-        """.trimIndent()
-      )
-      git.add().addFilepattern(".").call()
-      git.commit().setMessage("Initial commit").call()
-      git.remoteAdd().setName("origin").setUri(URIish("https://github.com/rahulsom/nothing.git")).call()
-
-      // Run the build
-      val runner = GradleRunner.create()
-      runner.forwardOutput()
-      runner.withPluginClasspath()
-      runner.withArguments("final", "taskTree")
-      runner.withProjectDir(projectDir)
-      val result = runner.build()
-
-      // Verify the result
-      assertThat(result.output).contains("publishNebulaPublicationToSonatypeRepository")
-
-      // Run showconfig
-      val showConfigResult = showConfig(projectDir)
-
-      // Verify the result
-      assertThat(showConfigResult).isEqualTo("""{"nexusUrl":"${WaenaRootPlugin.OSS.second}","snapshotRepositoryUrl":"${WaenaRootPlugin.OSS.first}"}""")
-    }
-  }
-
-  @Nested
-  inner class WithCentral {
-
-    @Test
-    fun `can run task`(@TempDir projectDir: File) {
-      // Setup the test build
-      Git.init().setDirectory(projectDir).call()
-      val git = Git.open(projectDir)
-      git.repository.config.setString("user", null, "name", "John Doe")
-      git.repository.config.setString("user", null, "email", "john.doe@example.com")
-      projectDir.mkdirs()
-      projectDir.resolve("settings.gradle").writeText("")
-      projectDir.resolve("build.gradle").writeText(
-        // language=groovy
-        """
+  companion object {
+    fun buildGradleScript(waenaConfig: String = ""): String {
+      // language=groovy
+      return """
             import com.github.rahulsom.waena.WaenaExtension
             import groovy.json.JsonBuilder
             plugins {
                 id('com.github.rahulsom.waena.root')
                 id('com.github.rahulsom.waena.published')
             }
-            
-            waena {
-                repositoryConfig.set(WaenaExtension.PublishMode.Central)
-            }
-            
+            $waenaConfig
             task('showconfig') {
               doLast {
                 println(new JsonBuilder([
@@ -113,35 +42,76 @@ class WaenaPluginFunctionalTest {
               }
             }
         """
+    }
+
+    @JvmStatic
+    fun configurations(): Stream<Arguments> =
+      Stream.of(
+        Arguments.arguments(
+          "",
+          setOf("publishNebulaPublicationToSonatypeRepository"),
+          WaenaRootPlugin.OSS.second,
+          WaenaRootPlugin.OSS.first,
+        ),
+        Arguments.arguments(
+          "waena { repositoryConfig.set(WaenaExtension.PublishMode.OSS) } ",
+          setOf("publishNebulaPublicationToSonatypeRepository"),
+          WaenaRootPlugin.OSS.second,
+          WaenaRootPlugin.OSS.first,
+        ),
+        Arguments.arguments(
+          "waena { repositoryConfig.set(WaenaExtension.PublishMode.Central) } ",
+          setOf("publishNebulaPublicationToSonatypeRepository"),
+          WaenaRootPlugin.CENTRAL.second,
+          WaenaRootPlugin.CENTRAL.first,
+        ),
+        Arguments.arguments(
+          "waena { repositoryConfig.set(WaenaExtension.PublishMode.S01) } ",
+          setOf("publishNebulaPublicationToSonatypeRepository"),
+          WaenaRootPlugin.S01.second,
+          WaenaRootPlugin.S01.first,
+        ),
       )
-      projectDir.resolve(".gitignore").writeText(
-        """
+  }
+
+  @MethodSource("configurations")
+  @ParameterizedTest
+  fun `generates correct tasks`(waenaConfig: String, tasks: Set<String>, nexusUrl: String, snapshotsUrl: String, @TempDir projectDir: File) {
+    Git.init().setDirectory(projectDir).call()
+    val git = Git.open(projectDir)
+    git.repository.config.setString("user", null, "name", "John Doe")
+    git.repository.config.setString("user", null, "email", "john.doe@example.com")
+    projectDir.mkdirs()
+    projectDir.resolve("settings.gradle").writeText("")
+    projectDir.resolve("build.gradle").writeText(buildGradleScript(waenaConfig))
+    projectDir.resolve(".gitignore").writeText(
+      """
             build/
             .gradle/
         """.trimIndent()
-      )
-      git.add().addFilepattern(".").call()
-      git.commit().setMessage("Initial commit").call()
-      git.remoteAdd().setName("origin").setUri(URIish("https://github.com/rahulsom/nothing.git")).call()
+    )
+    git.add().addFilepattern(".").call()
+    git.commit().setMessage("Initial commit").call()
+    git.remoteAdd().setName("origin").setUri(URIish("https://github.com/rahulsom/nothing.git")).call()
 
-      // Run the build
-      val runner = GradleRunner.create()
-      runner.forwardOutput()
-      runner.withPluginClasspath()
-      runner.withArguments("final", "taskTree")
-      runner.withProjectDir(projectDir)
-      val result = runner.build()
+    // Run the build
+    val runner = GradleRunner.create()
+    runner.forwardOutput()
+    runner.withPluginClasspath()
+    runner.withArguments("final", "taskTree")
+    runner.withProjectDir(projectDir)
+    val result = runner.build()
 
-      // Verify the result
-      assertThat(result.output).contains("publishNebulaPublicationToSonatypeRepository")
-
-
-      // Run showconfig
-      val showConfigResult = showConfig(projectDir)
-
-      // Verify the result
-      assertThat(showConfigResult).isEqualTo("""{"nexusUrl":"${WaenaRootPlugin.CENTRAL.second}","snapshotRepositoryUrl":"${WaenaRootPlugin.CENTRAL.first}"}""")
+    // Verify the result
+    tasks.forEach { t ->
+      assertThat(result.output).contains(t)
     }
+
+    // Run showconfig
+    val showConfigResult = showConfig(projectDir)
+
+    // Verify the result
+    assertThat(showConfigResult).isEqualTo("""{"nexusUrl":"${nexusUrl}","snapshotRepositoryUrl":"${snapshotsUrl}"}""")
   }
 
   @Nested

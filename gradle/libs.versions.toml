@@ -19,11 +19,12 @@ nexusPublish = { module = "io.github.gradle-nexus:publish-plugin", version.ref =
 taskTree = { module = "com.dorongold.plugins:task-tree", version.ref = "taskTree" }
 junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junitJupiter = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
 assertJ = { module = "org.assertj:assertj-core", version.ref = "assertJ" }
 jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
 
 [bundles]
-junit = [ "junitApi", "junitJupiter" ]
+junit = [ "junitApi", "junitJupiter", "junitParams" ]
 
 [plugins]
 gradlePublish = { id = "com.gradle.plugin-publish", version.ref = "gradlePublish" }
