@@ -2,13 +2,10 @@ package com.github.rahulsom.waena
 
 import nebula.plugin.info.InfoPlugin
 import nebula.plugin.info.scm.ScmInfoPlugin
-import nebula.plugin.publishing.publications.JavadocJarPlugin
-import nebula.plugin.publishing.publications.SourceJarPlugin
 import nebula.plugin.release.ReleasePlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaBasePlugin
-import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
@@ -41,28 +38,29 @@ class WaenaPublishedPlugin : Plugin<Project> {
       signProject(target)
     }
 
-    target.extensions.findByType<PublishingExtension>()?.apply {
-      repositories {
-        maven {
-          name = "local"
-          val rootBuildDir = target.rootProject.layout.buildDirectory.get()
-          val releasesRepoUrl = "$rootBuildDir/repos/releases"
-          val snapshotsRepoUrl = "$rootBuildDir/repos/snapshots"
-          val repoUrl = if (target.version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
-          url = target.file(repoUrl).toURI()
-        }
-      }
+    val publishingExtension = target.extensions.findByType<PublishingExtension>()!!
+    val rootProject = target.rootProject
+    val waenaExtension = rootProject.extensions.getByType(WaenaExtension::class.java)
+
+    publishingExtension.repositories.maven {
+      name = "local"
+      val rootBuildDir = target.rootProject.layout.buildDirectory.get()
+      val releasesRepoUrl = "$rootBuildDir/repos/releases"
+      val snapshotsRepoUrl = "$rootBuildDir/repos/snapshots"
+      val repoUrl = if (target.version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
+      url = target.file(repoUrl).toURI()
     }
 
-    val waenaExtension = target.rootProject.extensions.getByType(WaenaExtension::class.java)
     configurePom(target, waenaExtension)
 
     if (target.rootProject == target) {
       target.rootProject.tasks.findByPath("release")?.dependsOn(":publish")
       target.rootProject.tasks.getByPath("closeSonatypeStagingRepository").mustRunAfter(":publish")
+      target.rootProject.tasks.findByPath("jreleaserDeploy")?.mustRunAfter(":publish")
     } else {
       target.rootProject.tasks.findByPath("release")?.dependsOn(":${target.name}:publish")
       target.rootProject.tasks.getByPath("closeSonatypeStagingRepository").mustRunAfter(":${target.name}:publish")
+      target.rootProject.tasks.findByPath("jreleaserDeploy")?.mustRunAfter(":${target.name}:publish")
     }
 
     target.tasks.withType(AbstractArchiveTask::class.java).configureEach {
