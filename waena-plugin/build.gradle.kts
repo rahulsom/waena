@@ -15,6 +15,7 @@ dependencies {
   implementation(libs.gradleInfo)
   implementation(libs.nexusPublish)
   implementation(libs.taskTree)
+  implementation(libs.jreleaser)
 
   testImplementation(libs.bundles.junit)
   testImplementation(libs.assertJ)
