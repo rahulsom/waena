@@ -73,8 +73,10 @@ class WaenaRootPlugin : Plugin<Project> {
               active.set(Active.ALWAYS)
               url.set(CENTRAL.second)
               stagingRepository("build/repos/releases")
-              username.set(rootProject.property("sonatypeUsername") as String)
-              password.set(rootProject.property("sonatypePassword") as String)
+              if (rootProject.hasProperty("sonatypeUsername")) {
+                username.set(rootProject.property("sonatypeUsername") as String)
+                password.set(rootProject.property("sonatypePassword") as String)
+              }
               sign.set(false)
             }
           }
