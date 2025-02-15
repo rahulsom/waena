@@ -16,6 +16,7 @@ import org.jreleaser.gradle.plugin.JReleaserExtension
 import org.jreleaser.gradle.plugin.JReleaserPlugin
 import org.jreleaser.model.Active
 import java.time.Duration
+import kotlin.math.max
 
 class WaenaRootPlugin : Plugin<Project> {
 
@@ -78,6 +79,7 @@ class WaenaRootPlugin : Plugin<Project> {
                 password.set(rootProject.property("sonatypePassword") as String)
               }
               sign.set(false)
+              retryDelay.set(centralRetryDelay(rootProject))
             }
           }
         }
@@ -136,6 +138,10 @@ class WaenaRootPlugin : Plugin<Project> {
       PublishMode.Central -> CENTRAL
       PublishMode.S01 -> S01
     }
+  })
+
+  fun centralRetryDelay(rootProject: Project) = DefaultProvider({
+    max(10, rootProject.subprojects.size * 5)
   })
 
 }
