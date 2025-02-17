@@ -122,10 +122,10 @@ class WaenaPublishedPlugin : Plugin<Project> {
     val origin = scmInfoPlugin.findProvider(project).calculateOrigin(project)
 
     val matchingRegex = listOf(
-      Regex("https://github.com/([^/]+)/([^/]+)"),
-      Regex("git@github.com:([^/]+)/([^/]+)\\.git"),
       Regex("https://github.com/([^/]+)/([^/]+)\\.git"),
-      Regex("git://github.com/([^/]+)/([^/]+)\\.git")
+      Regex("git://github.com/([^/]+)/([^/]+)\\.git"),
+      Regex("git@github.com:([^/]+)/([^/]+)\\.git"),
+      Regex("https://github.com/([^/]+)/([^/]+)"),
     ).find { origin.matches(it) }
     val message = matchingRegex?.matchEntire(origin)
     val repoKey = message?.let { it.groupValues[1] + "/" + it.groupValues[2] } ?: "rahulsom/nothing"
