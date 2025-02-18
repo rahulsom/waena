@@ -7,7 +7,7 @@ jreleaser = "1.16.0"
 junit = "5.11.4"
 nebulaContacts = "7.0.1"
 nebulaPublish = "21.1.0"
-nebulaRelease = "20.0.1"
+nebulaRelease = "20.0.2"
 nexusPublish = "2.0.0"
 taskTree = "4.0.0"
 
