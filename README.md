@@ -1,5 +1,7 @@
 # Waena
 
+[![GitHub commits since latest release](https://img.shields.io/github/commits-since/rahulsom/waena/latest?style=for-the-badge)](https://github.com/rahulsom/waena/releases/new)
+
 Gradle plugins for publishing to Maven Central
 
 ## Setup
@@ -8,7 +10,7 @@ There are 2 plugins that make up this project.
 
 ### Waena Root
 
-[![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/com.github.rahulsom.waena.root)](https://plugins.gradle.org/plugin/com.github.rahulsom.waena.root)
+[![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/com.github.rahulsom.waena.root?style=for-the-badge)](https://plugins.gradle.org/plugin/com.github.rahulsom.waena.root)
 
 This needs to be applied only to the root project.
 
@@ -33,7 +35,7 @@ contacts {
 
 ### Waena Published
 
-[![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/com.github.rahulsom.waena.published)](https://plugins.gradle.org/plugin/com.github.rahulsom.waena.published)
+[![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/com.github.rahulsom.waena.published?style=for-the-badge)](https://plugins.gradle.org/plugin/com.github.rahulsom.waena.published)
 
 This needs to be applied to each module in the project that needs to be published.
 
