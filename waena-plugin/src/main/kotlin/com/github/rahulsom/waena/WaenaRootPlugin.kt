@@ -141,7 +141,7 @@ class WaenaRootPlugin : Plugin<Project> {
   })
 
   fun centralRetryDelay(rootProject: Project) = DefaultProvider({
-    max(10, rootProject.subprojects.size * 5)
+    max(30, rootProject.subprojects.size * 15)
   })
 
 }
