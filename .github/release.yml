@@ -5,3 +5,19 @@ changelog:
       - renovate[bot]
     labels:
       - dependency
+  categories:
+    - title: Enhancements
+      labels:
+        - enhancement
+    - title: Bug Fixes
+      labels:
+        - bug
+    - title: Test Improvements
+      labels:
+        - test
+    - title: Build/Repo Chores
+      labels:
+        - chore
+    - title: Other
+      labels:
+        - "*"
