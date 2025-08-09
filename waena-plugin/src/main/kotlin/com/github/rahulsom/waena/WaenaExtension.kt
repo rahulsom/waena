@@ -29,10 +29,18 @@ open class WaenaExtension(project: Project) {
     /**
      * Publish to OSSRH (OSS Sonatype Repository Hosting)
      */
+    @Deprecated(
+      message = "Publishing to OSS is no longer supported. Please migrate to Central.",
+      replaceWith = ReplaceWith("Central")
+    )
     OSS,
     /**
      * Publish to S01 (temporary Sonatype Repository Hosting)
      */
+    @Deprecated(
+      message = "S01 is no longer supported. Please migrate to Central.",
+      replaceWith = ReplaceWith("Central")
+    )
     S01
   }
 
