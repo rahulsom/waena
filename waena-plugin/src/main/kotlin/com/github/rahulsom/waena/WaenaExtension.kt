@@ -22,8 +22,17 @@ open class WaenaExtension(project: Project) {
   }
 
   enum class PublishMode {
-    OSS,
+    /**
+     * Publish to Maven Central via Sonatype Portal
+     */
     Central,
+    /**
+     * Publish to OSSRH (OSS Sonatype Repository Hosting)
+     */
+    OSS,
+    /**
+     * Publish to S01 (temporary Sonatype Repository Hosting)
+     */
     S01
   }
 
@@ -32,7 +41,7 @@ open class WaenaExtension(project: Project) {
     .convention(License.Apache2)
   val publishMode: Property<PublishMode> = project.objects
     .property(PublishMode::class.java)
-    .convention(PublishMode.OSS)
+    .convention(PublishMode.Central)
 
   @Throws(JsonProcessingException::class)
   fun toJson(): String? {
