@@ -23,7 +23,6 @@ class WaenaPublishedPlugin : Plugin<Project> {
     target.plugins.apply(SigningPlugin::class.java)
     target.plugins.apply(ReleasePlugin::class.java)
     target.plugins.apply(NebulaMavenPublishPlugin::class.java)
-    target.plugins.apply(InfoPlugin::class.java)
     target.plugins.withType(JavaBasePlugin::class.java) {
       val javaPluginExtension = target.extensions.getByType(JavaPluginExtension::class.java)
       javaPluginExtension.withJavadocJar()
@@ -118,7 +117,7 @@ class WaenaPublishedPlugin : Plugin<Project> {
   }
 
   private fun getGithubRepoKey(project: Project): String {
-    val scmInfoPlugin = project.plugins.getAt(ScmInfoPlugin::class.java)
+    val scmInfoPlugin = project.rootProject.plugins.getAt(ScmInfoPlugin::class.java)
     val origin = scmInfoPlugin.findProvider(project).calculateOrigin(project)
 
     val matchingRegex = listOf(
