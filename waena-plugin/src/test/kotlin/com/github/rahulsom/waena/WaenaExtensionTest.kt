@@ -11,7 +11,7 @@ class WaenaExtensionTest {
     val project = ProjectBuilder.builder().build()
     val extension = WaenaExtension(project)
     assertThat(extension.license.get()).isEqualTo(WaenaExtension.License.Apache2)
-    assertThat(extension.publishMode.get()).isEqualTo(WaenaExtension.PublishMode.OSS)
+    assertThat(extension.publishMode.get()).isEqualTo(WaenaExtension.PublishMode.Central)
   }
 
   @Test
@@ -36,6 +36,6 @@ class WaenaExtensionTest {
     val extension = WaenaExtension(project)
     val extensionConfig = ObjectMapper().readValue(extension.toJson(), Map::class.java)
     assertThat(extensionConfig["license"]).isEqualTo(WaenaExtension.License.Apache2.toString())
-    assertThat(extensionConfig["publishMode"]).isEqualTo(WaenaExtension.PublishMode.OSS.toString())
+    assertThat(extensionConfig["publishMode"]).isEqualTo(WaenaExtension.PublishMode.Central.toString())
   }
 }

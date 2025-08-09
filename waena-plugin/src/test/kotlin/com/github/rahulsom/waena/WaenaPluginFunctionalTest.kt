@@ -46,7 +46,7 @@ class WaenaPluginFunctionalTest {
       "snapshot",
       setOf("publishNebulaPublicationToSonatypeRepository"),
       setOf<String>("closeSonatypeStagingRepository"),
-      WaenaRootPlugin.OSS,
+      WaenaRootPlugin.CENTRAL,
       projectDir
     )
   }
@@ -58,7 +58,7 @@ class WaenaPluginFunctionalTest {
       "final",
       setOf("publishNebulaPublicationToLocalRepository", "publishNebulaPublicationToSonatypeRepository", "closeSonatypeStagingRepository", "releaseSonatypeStagingRepository"),
       setOf(),
-      WaenaRootPlugin.OSS,
+      WaenaRootPlugin.CENTRAL,
       projectDir
     )
   }
