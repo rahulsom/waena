@@ -5,6 +5,7 @@ import com.github.rahulsom.waena.WaenaExtension.PublishMode
 import io.github.gradlenexus.publishplugin.NexusPublishExtension
 import io.github.gradlenexus.publishplugin.NexusPublishPlugin
 import nebula.plugin.contacts.ContactsPlugin
+import nebula.plugin.info.InfoPlugin
 import nebula.plugin.release.ReleasePlugin
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -37,6 +38,7 @@ class WaenaRootPlugin : Plugin<Project> {
     rootProject.plugins.apply(SigningPlugin::class.java)
     rootProject.plugins.apply(ReleasePlugin::class.java)
     rootProject.plugins.apply(TaskTreePlugin::class.java)
+    rootProject.plugins.apply(InfoPlugin::class.java)
     val waenaExtension = rootProject.extensions.create("waena", WaenaExtension::class.java, rootProject)
 
     rootProject.allprojects.forEach { target ->

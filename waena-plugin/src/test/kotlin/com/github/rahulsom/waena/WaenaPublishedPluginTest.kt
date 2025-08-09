@@ -24,6 +24,8 @@ class WaenaPublishedPluginTest {
     assertThat(installedPlugins.find { it is SigningPlugin }).isNotNull()
     assertThat(installedPlugins.find { it is ReleasePlugin }).isNotNull()
     assertThat(installedPlugins.find { it is MavenPublishPlugin }).isNotNull()
-    assertThat(installedPlugins.find { it is InfoPlugin }).isNotNull()
+
+    val rootPlugins = rootProject.plugins
+    assertThat(rootPlugins.find { it is InfoPlugin }).isNotNull()
   }
 }
