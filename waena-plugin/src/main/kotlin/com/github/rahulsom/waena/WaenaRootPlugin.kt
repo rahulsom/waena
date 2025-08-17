@@ -59,7 +59,7 @@ class WaenaRootPlugin : Plugin<Project> {
     rootProject.tasks.getByPath(":initializeSonatypeStagingRepository").enabled = isSnapshot
     rootProject.tasks.getByPath(":closeSonatypeStagingRepository").enabled = isSnapshot
     rootProject.tasks.getByPath(":releaseSonatypeStagingRepository").enabled = isSnapshot
-    rootProject.subprojects.forEach { project ->
+    rootProject.allprojects.forEach { project ->
       project.afterEvaluate {
         project.tasks.findByName("publishNebulaPublicationToSonatypeRepository")?.enabled = isSnapshot
       }
