@@ -4,6 +4,7 @@ import org.assertj.core.api.SoftAssertions
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.transport.URIish
 import org.gradle.testkit.runner.GradleRunner
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -56,7 +57,12 @@ class WaenaPluginFunctionalTest {
     runTest(
       "",
       "final",
-      setOf("publishNebulaPublicationToLocalRepository", "publishNebulaPublicationToSonatypeRepository", "closeSonatypeStagingRepository", "releaseSonatypeStagingRepository"),
+      setOf(
+        "publishNebulaPublicationToLocalRepository",
+        "publishNebulaPublicationToSonatypeRepository",
+        "closeSonatypeStagingRepository",
+        "releaseSonatypeStagingRepository"
+      ),
       setOf(),
       WaenaRootPlugin.CENTRAL,
       projectDir
@@ -80,7 +86,12 @@ class WaenaPluginFunctionalTest {
     runTest(
       "waena { publishMode.set(PublishMode.OSS) } ",
       "final",
-      setOf("publishNebulaPublicationToLocalRepository", "publishNebulaPublicationToSonatypeRepository", "closeSonatypeStagingRepository", "releaseSonatypeStagingRepository"),
+      setOf(
+        "publishNebulaPublicationToLocalRepository",
+        "publishNebulaPublicationToSonatypeRepository",
+        "closeSonatypeStagingRepository",
+        "releaseSonatypeStagingRepository"
+      ),
       setOf(),
       WaenaRootPlugin.OSS,
       projectDir
@@ -130,7 +141,12 @@ class WaenaPluginFunctionalTest {
     runTest(
       "waena { publishMode.set(PublishMode.S01) } ",
       "final",
-      setOf("publishNebulaPublicationToLocalRepository", "publishNebulaPublicationToSonatypeRepository", "closeSonatypeStagingRepository", "releaseSonatypeStagingRepository"),
+      setOf(
+        "publishNebulaPublicationToLocalRepository",
+        "publishNebulaPublicationToSonatypeRepository",
+        "closeSonatypeStagingRepository",
+        "releaseSonatypeStagingRepository"
+      ),
       setOf(),
       WaenaRootPlugin.S01,
       projectDir
@@ -138,7 +154,7 @@ class WaenaPluginFunctionalTest {
   }
 
   fun runTest(
-    waenaConfig: String,
+    @Language("kotlin") waenaConfig: String,
     task: String,
     containsTasks: Set<String>,
     doesNotContainTasks: Set<String>,
@@ -177,28 +193,23 @@ class WaenaPluginFunctionalTest {
     }
 
     // Verify the result
-    softly.assertThat(showConfigResult!!.split("\n").first { it -> it.contains("snapshotRepositoryUrl") })
+    softly.assertThat(showConfigResult!!.split("\n").first { it.contains("snapshotRepositoryUrl") })
       .isEqualTo("""{"nexusUrl":"${urls.second}","snapshotRepositoryUrl":"${urls.first}"}""")
     softly.assertAll()
   }
 
   private fun getTaskTree(task: String, projectDir: File): String? {
-    val runner = GradleRunner.create()
-    runner.forwardOutput()
-    runner.withPluginClasspath()
+    val runner = baseRunner(projectDir)
     runner.withArguments(task, "taskTree")
-    runner.withProjectDir(projectDir)
-    val result = runner.build()
-    val taskTree = result.output
-    return taskTree
+    val result = runner.build().output
+    return result
   }
 
+  private fun baseRunner(projectDir: File): GradleRunner = GradleRunner.create().forwardOutput().withPluginClasspath().withProjectDir(projectDir)
+
   private fun showConfig(projectDir: File): String? {
-    val showConfigRunner = GradleRunner.create()
-    showConfigRunner.forwardOutput()
-    showConfigRunner.withPluginClasspath()
+    val showConfigRunner = baseRunner(projectDir)
     showConfigRunner.withArguments("showconfig")
-    showConfigRunner.withProjectDir(projectDir)
     val showConfigResult = showConfigRunner.build().output
     return showConfigResult
   }
