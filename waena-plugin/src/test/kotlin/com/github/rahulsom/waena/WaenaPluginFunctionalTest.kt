@@ -5,10 +5,24 @@ import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.transport.URIish
 import org.gradle.testkit.runner.GradleRunner
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
+
+private const val SNAPSHOT = "snapshot"
+private const val FINAL = "final"
+
+private const val PUBLISH_SONATYPE = "publishNebulaPublicationToSonatypeRepository"
+private const val CLOSE_SONATYPE = "closeSonatypeStagingRepository"
+private const val PUBLISH_LOCAL = "publishNebulaPublicationToLocalRepository"
+private const val RELEASE_SONATYPE = "releaseSonatypeStagingRepository"
+
+private val ALL_TASKS = setOf(
+  PUBLISH_LOCAL,
+  PUBLISH_SONATYPE,
+  CLOSE_SONATYPE,
+  RELEASE_SONATYPE
+)
 
 /**
  * A simple functional test for the 'com.github.rahulsom.waena.greeting' plugin.
@@ -44,9 +58,8 @@ class WaenaPluginFunctionalTest {
   fun `snapshot without customization`(@TempDir projectDir: File) {
     runTest(
       "",
-      "snapshot",
-      setOf("publishNebulaPublicationToSonatypeRepository"),
-      setOf<String>("closeSonatypeStagingRepository"),
+      SNAPSHOT,
+      setOf(PUBLISH_SONATYPE, PUBLISH_LOCAL),
       WaenaRootPlugin.CENTRAL,
       projectDir
     )
@@ -56,14 +69,8 @@ class WaenaPluginFunctionalTest {
   fun `final without customization`(@TempDir projectDir: File) {
     runTest(
       "",
-      "final",
-      setOf(
-        "publishNebulaPublicationToLocalRepository",
-        "publishNebulaPublicationToSonatypeRepository",
-        "closeSonatypeStagingRepository",
-        "releaseSonatypeStagingRepository"
-      ),
-      setOf(),
+      FINAL,
+      setOf(PUBLISH_LOCAL, PUBLISH_SONATYPE, CLOSE_SONATYPE, RELEASE_SONATYPE),
       WaenaRootPlugin.CENTRAL,
       projectDir
     )
@@ -73,9 +80,8 @@ class WaenaPluginFunctionalTest {
   fun `snapshot for OSS`(@TempDir projectDir: File) {
     runTest(
       "waena { publishMode.set(PublishMode.OSS) } ",
-      "snapshot",
-      setOf("publishNebulaPublicationToLocalRepository", "publishNebulaPublicationToSonatypeRepository"),
-      setOf("closeSonatypeStagingRepository", "releaseSonatypeStagingRepository"),
+      SNAPSHOT,
+      setOf(PUBLISH_LOCAL, PUBLISH_SONATYPE),
       WaenaRootPlugin.OSS,
       projectDir
     )
@@ -85,40 +91,30 @@ class WaenaPluginFunctionalTest {
   fun `final for OSS`(@TempDir projectDir: File) {
     runTest(
       "waena { publishMode.set(PublishMode.OSS) } ",
-      "final",
-      setOf(
-        "publishNebulaPublicationToLocalRepository",
-        "publishNebulaPublicationToSonatypeRepository",
-        "closeSonatypeStagingRepository",
-        "releaseSonatypeStagingRepository"
-      ),
-      setOf(),
+      FINAL,
+      setOf(PUBLISH_LOCAL, PUBLISH_SONATYPE, CLOSE_SONATYPE, RELEASE_SONATYPE),
       WaenaRootPlugin.OSS,
       projectDir
     )
   }
 
   @Test
-  @Disabled
   fun `snapshot for Central`(@TempDir projectDir: File) {
     runTest(
       "waena { publishMode.set(PublishMode.Central) } ",
-      "snapshot",
-      setOf("publishNebulaPublicationToLocalRepository", "publishNebulaPublicationToSonatypeRepository"),
-      setOf("closeSonatypeStagingRepository", "releaseSonatypeStagingRepository"),
+      SNAPSHOT,
+      setOf(PUBLISH_LOCAL, PUBLISH_SONATYPE),
       WaenaRootPlugin.CENTRAL,
       projectDir
     )
   }
 
-  @Disabled
   @Test
   fun `final for Central`(@TempDir projectDir: File) {
     runTest(
       "waena { publishMode.set(PublishMode.Central) } ",
-      "final",
-      setOf("publishNebulaPublicationToLocalRepository"),
-      setOf("publishNebulaPublicationToSonatypeRepository", "closeSonatypeStagingRepository", "releaseSonatypeStagingRepository"),
+      FINAL,
+      setOf(PUBLISH_LOCAL, RELEASE_SONATYPE, CLOSE_SONATYPE, PUBLISH_SONATYPE),
       WaenaRootPlugin.CENTRAL,
       projectDir
     )
@@ -128,9 +124,8 @@ class WaenaPluginFunctionalTest {
   fun `snapshot for S01`(@TempDir projectDir: File) {
     runTest(
       "waena { publishMode.set(PublishMode.S01) } ",
-      "snapshot",
-      setOf("publishNebulaPublicationToLocalRepository", "publishNebulaPublicationToSonatypeRepository"),
-      setOf("closeSonatypeStagingRepository", "releaseSonatypeStagingRepository"),
+      SNAPSHOT,
+      setOf(PUBLISH_LOCAL, PUBLISH_SONATYPE),
       WaenaRootPlugin.S01,
       projectDir
     )
@@ -140,14 +135,8 @@ class WaenaPluginFunctionalTest {
   fun `final for S01`(@TempDir projectDir: File) {
     runTest(
       "waena { publishMode.set(PublishMode.S01) } ",
-      "final",
-      setOf(
-        "publishNebulaPublicationToLocalRepository",
-        "publishNebulaPublicationToSonatypeRepository",
-        "closeSonatypeStagingRepository",
-        "releaseSonatypeStagingRepository"
-      ),
-      setOf(),
+      FINAL,
+      setOf(PUBLISH_LOCAL, PUBLISH_SONATYPE, CLOSE_SONATYPE, RELEASE_SONATYPE),
       WaenaRootPlugin.S01,
       projectDir
     )
@@ -157,10 +146,10 @@ class WaenaPluginFunctionalTest {
     @Language("kotlin") waenaConfig: String,
     task: String,
     containsTasks: Set<String>,
-    doesNotContainTasks: Set<String>,
     urls: Pair<String, String>,
     @TempDir projectDir: File
   ) {
+    val doesNotContainTasks = ALL_TASKS - containsTasks
     val softly = SoftAssertions()
     Git.init().setDirectory(projectDir).call()
     val git = Git.open(projectDir)
