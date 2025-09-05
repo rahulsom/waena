@@ -13,8 +13,8 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
-import java.util.stream.Stream
 import java.io.File
+import java.util.stream.Stream
 
 /**
  * A simple functional test for the 'com.github.rahulsom.waena.greeting' plugin.
