@@ -1,6 +1,5 @@
 package com.github.rahulsom.waena
 
-import nebula.plugin.info.InfoPlugin
 import nebula.plugin.info.scm.ScmInfoPlugin
 import nebula.plugin.release.ReleasePlugin
 import org.gradle.api.Plugin
