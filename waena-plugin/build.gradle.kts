@@ -20,6 +20,8 @@ dependencies {
   testImplementation(libs.bundles.junit)
   testImplementation(libs.assertJ)
   testImplementation(libs.jgit)
+  testImplementation(libs.mockitoCore)
+  testImplementation(libs.mockitoKotlin)
 }
 
 gradlePlugin {
