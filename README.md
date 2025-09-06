@@ -46,11 +46,10 @@ plugins {
 
 description = "TODO"
 
-// Optional (to customize license)
+// Optional (to customize license/publishMode)
+// Right now there's only one working publish mode - Central
 waena {
     license.set(WaenaExtension.License.Apache2)
-    // By default, publishMode is set to OSS. You can set it to S01 or Central
-    // if your maven central is setup for something other than oss.sonatype.org
     publishMode.set(WaenaExtension.PublishMode.Central)
 }
 ```

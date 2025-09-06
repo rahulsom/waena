@@ -1,7 +1,6 @@
 package com.github.rahulsom.waena
 
 import com.dorongold.gradle.tasktree.TaskTreePlugin
-import com.github.rahulsom.waena.WaenaExtension.PublishMode
 import io.github.gradlenexus.publishplugin.NexusPublishExtension
 import io.github.gradlenexus.publishplugin.NexusPublishPlugin
 import nebula.plugin.contacts.ContactsPlugin
@@ -23,8 +22,6 @@ class WaenaRootPlugin : Plugin<Project> {
 
   companion object {
     val CENTRAL = Pair("https://central.sonatype.com/repository/maven-snapshots/", "https://central.sonatype.com/api/v1/publisher")
-    val OSS = Pair("https://oss.sonatype.org/content/repositories/snapshots/", "https://oss.sonatype.org/service/local/")
-    val S01 = Pair("https://s01.oss.sonatype.org/content/repositories/snapshots/", "https://s01.oss.sonatype.org/service/local/")
   }
 
   override fun apply(target: Project) {
@@ -131,14 +128,12 @@ class WaenaRootPlugin : Plugin<Project> {
 
   private fun useNexusPublishPlugin(rootProject: Project): Boolean {
     val publishMode = rootProject.extensions.getByType<WaenaExtension>().publishMode.get()
-    return publishMode != PublishMode.Central
+    return publishMode != WaenaExtension.PublishMode.Central
   }
 
   fun provideUrls(extension: WaenaExtension) = DefaultProvider({
     when (extension.publishMode.get()) {
-      PublishMode.OSS -> OSS
-      PublishMode.Central -> CENTRAL
-      PublishMode.S01 -> S01
+      WaenaExtension.PublishMode.Central -> CENTRAL
     }
   })
 
