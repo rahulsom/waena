@@ -6,6 +6,8 @@ jgit = "7.+"
 jreleaser = "1.20.0"
 junit = "5.13.4"
 junitPlatform = "1.13.4"
+mockito = "5.14.0"
+mockitoKotlin = "5.4.0"
 nebulaContacts = "7.0.2"
 nebulaPublish = "22.0.0"
 nebulaRelease = "21.0.0"
@@ -21,6 +23,8 @@ junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "juni
 junitJupiter = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
 junitPlatformLauncher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junitPlatform" }
+mockitoCore = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockitoKotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
 nebulaContacts = { module = "com.netflix.nebula:gradle-contacts-plugin", version.ref = "nebulaContacts" }
 nebulaPublish = { module = "com.netflix.nebula:nebula-publishing-plugin", version.ref = "nebulaPublish" }
 nebulaRelease = { module = "com.netflix.nebula:nebula-release-plugin", version.ref = "nebulaRelease" }

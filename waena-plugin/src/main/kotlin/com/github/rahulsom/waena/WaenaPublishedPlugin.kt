@@ -115,18 +115,17 @@ class WaenaPublishedPlugin : Plugin<Project> {
     }
   }
 
-  private fun getGithubRepoKey(project: Project): String {
+  fun getGithubRepoKey(project: Project): String {
     val scmInfoPlugin = project.rootProject.plugins.getAt(ScmInfoPlugin::class.java)
     val origin = scmInfoPlugin.findProvider(project).calculateOrigin(project)
 
-    val matchingRegex = listOf(
-      Regex("https://github.com/([^/]+)/([^/]+)\\.git"),
-      Regex("git://github.com/([^/]+)/([^/]+)\\.git"),
-      Regex("git@github.com:([^/]+)/([^/]+)\\.git"),
-      Regex("https://github.com/([^/]+)/([^/]+)"),
-    ).find { origin.matches(it) }
-    val message = matchingRegex?.matchEntire(origin)
-    val repoKey = message?.let { it.groupValues[1] + "/" + it.groupValues[2] } ?: "rahulsom/nothing"
+    val githubRegex = Regex("""^(?:https://github\.com/|git://github\.com/|git@github\.com:)(?<owner>[^/]+)/(?<repo>[^/]+?)(?:\.git)?$""")
+    val matchResult = githubRegex.matchEntire(origin)
+    val repoKey = matchResult?.let {
+      val owner = it.groups["owner"]?.value ?: ""
+      val repo = it.groups["repo"]?.value?.removeSuffix(".git") ?: ""
+      "$owner/$repo"
+    } ?: "rahulsom/nothing"
     return repoKey
   }
 
