@@ -1,8 +1,6 @@
 package com.github.rahulsom.waena
 
 import com.github.rahulsom.waena.WaenaRootPlugin.Companion.CENTRAL
-import com.github.rahulsom.waena.WaenaRootPlugin.Companion.OSS
-import com.github.rahulsom.waena.WaenaRootPlugin.Companion.S01
 import org.assertj.core.api.SoftAssertions
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.transport.URIish
@@ -36,7 +34,6 @@ class WaenaPluginFunctionalTest {
     fun buildGradleScript(waenaConfig: String = ""): String {
       // language=groovy
       return """
-            import com.github.rahulsom.waena.WaenaExtension.PublishMode
             import com.github.rahulsom.waena.WaenaExtension
             import groovy.json.JsonBuilder
             plugins {
@@ -61,9 +58,7 @@ class WaenaPluginFunctionalTest {
       val gradleVersion = listOf(null, "9.0.0")
       val configUrlPairs = listOf(
         Pair(null, CENTRAL),
-        Pair("OSS", OSS),
         Pair("Central", CENTRAL),
-        Pair("S01", S01)
       )
       val taskTasksPairs = listOf(
         Pair(SNAPSHOT, PUBLISH_TASKS),
@@ -89,7 +84,7 @@ class WaenaPluginFunctionalTest {
     gradleVersion: String?,
     @TempDir projectDir: File
   ) {
-    val waenaConfig = if (testName == null) "" else "waena { publishMode.set(PublishMode.$testName) }"
+    val waenaConfig = if (testName == null) "" else "waena { publishMode.set(WaenaExtension.PublishMode.$testName) }"
     runTest(waenaConfig, task, containsTasks, urls, gradleVersion, projectDir)
   }
 
