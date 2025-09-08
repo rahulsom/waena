@@ -85,8 +85,15 @@ class WaenaPublishedPlugin : Plugin<Project> {
     }
   }
 
+  data class HostedRepo(val host: String, val repo: Repo)
+  data class Repo(val owner: String, val name: String) {
+    override fun toString(): String {
+      return "$owner/$name"
+    }
+  }
+
   private fun configurePom(project: Project, waenaExtension: WaenaExtension) {
-    val repoKey = getGithubRepoKey(project)
+    val repoKey = getHostedRepoInfo(project)
 
     project.plugins.withType(MavenPublishPlugin::class.java).configureEach {
       val publishing = project.extensions.getByType<PublishingExtension>()
@@ -94,7 +101,7 @@ class WaenaPublishedPlugin : Plugin<Project> {
         pom {
           name.set("${project.group}:${project.name}")
           description.set(name)
-          url.set("https://github.com/$repoKey")
+          url.set("https://github.com/${repoKey.repo}")
           licenses {
             license {
               name.set(waenaExtension.license.get().license)
@@ -102,31 +109,33 @@ class WaenaPublishedPlugin : Plugin<Project> {
             }
           }
           scm {
-            connection.set("scm:git:https://github.com/$repoKey")
-            developerConnection.set("scm:git:ssh://github.com/$repoKey.git")
-            url.set("https://github.com/$repoKey")
+            connection.set("scm:git:https://github.com/${repoKey.repo}")
+            developerConnection.set("scm:git:ssh://github.com/${repoKey.repo}.git")
+            url.set("https://github.com/${repoKey.repo}")
           }
           issueManagement {
             this.system.set("github")
-            this.url.set("https://github.com/$repoKey/issues")
+            this.url.set("https://github.com/${repoKey.repo}/issues")
           }
         }
       }
     }
   }
 
-  fun getGithubRepoKey(project: Project): String {
+  fun getHostedRepoInfo(project: Project, origin: String? = null): HostedRepo {
     val scmInfoPlugin = project.rootProject.plugins.getAt(ScmInfoPlugin::class.java)
-    val origin = scmInfoPlugin.findProvider(project).calculateOrigin(project)
+    val originUrl = origin ?: scmInfoPlugin.findProvider(project).calculateOrigin(project)
 
-    val githubRegex = Regex("""^(?:https://github\.com/|git://github\.com/|git@github\.com:)(?<owner>[^/]+)/(?<repo>[^/]+?)(?:\.git)?$""")
-    val matchResult = githubRegex.matchEntire(origin)
-    val repoKey = matchResult?.let {
+    val hostedRepoRegex =
+      Regex("^(?:https?://|git://|git@)(?<host>[^/:]+)[:/](?<owner>[^/]+)/(?<repo>[^/]+?)(?:.git)?$")
+    val matchResult = hostedRepoRegex.matchEntire(originUrl)
+    val (host, repo) = matchResult?.let {
+      val host = it.groups["host"]?.value ?: ""
       val owner = it.groups["owner"]?.value ?: ""
-      val repo = it.groups["repo"]?.value?.removeSuffix(".git") ?: ""
-      "$owner/$repo"
-    } ?: "rahulsom/nothing"
-    return repoKey
+      val repoName = it.groups["repo"]?.value?.removeSuffix(".git") ?: ""
+      host to Repo(owner, repoName)
+    } ?: ("unknown" to Repo("rahulsom", "nothing"))
+    return HostedRepo(host, repo)
   }
 
 }

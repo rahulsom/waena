@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 
+
+
 class WaenaPublishedPluginTest {
   @Test
   fun `plugin registers task`() {
@@ -33,42 +35,49 @@ class WaenaPublishedPluginTest {
 
   @ParameterizedTest
   @CsvSource(
-    "'https://github.com/rahulsom/waena.git', 'rahulsom/waena'",
-    "'git://github.com/rahulsom/waena.git', 'rahulsom/waena'",
-    "'git@github.com:rahulsom/waena.git', 'rahulsom/waena'",
-    "'git@github.com:rahulsom/svg-builder', 'rahulsom/svg-builder'",
-    "'https://github.com/rahulsom/waena', 'rahulsom/waena'",
-    "'https://github.com/owner/repo.git', 'owner/repo'",
-    "'git://github.com/owner/repo.git', 'owner/repo'",
-    "'git://github.com/owner/repo', 'owner/repo'",
-    "'git@github.com:owner/repo.git', 'owner/repo'",
-    "'git@github.com:owner/repo', 'owner/repo'",
-    "'https://github.com/owner/repo', 'owner/repo'"
+    "'https://github.com/rahulsom/waena.git', 'github.com', 'rahulsom', 'waena'",
+    "'git://github.com/rahulsom/waena.git', 'github.com', 'rahulsom', 'waena'",
+    "'git@github.com:rahulsom/waena.git', 'github.com', 'rahulsom', 'waena'",
+    "'git@github.com:rahulsom/svg-builder', 'github.com', 'rahulsom', 'svg-builder'",
+    "'https://github.com/rahulsom/waena', 'github.com', 'rahulsom', 'waena'",
+    "'https://github.com/owner/repo.git', 'github.com', 'owner', 'repo'",
+    "'git://github.com/owner/repo.git', 'github.com', 'owner', 'repo'",
+    "'git://github.com/owner/repo', 'github.com', 'owner', 'repo'",
+    "'git@github.com:owner/repo.git', 'github.com', 'owner', 'repo'",
+    "'git@github.com:owner/repo', 'github.com', 'owner', 'repo'",
+    "'https://github.com/owner/repo', 'github.com', 'owner', 'repo'",
+    "'https://bitbucket.org/owner/repo.git', 'bitbucket.org', 'owner', 'repo'",
+    "'git@bitbucket.org:owner/repo.git', 'bitbucket.org', 'owner', 'repo'",
+    "'https://gitlab.com/group/project.git', 'gitlab.com', 'group', 'project'",
+    "'git://gitlab.com/group/project', 'gitlab.com', 'group', 'project'"
   )
-  fun `regex patterns match various GitHub URL formats correctly`(origin: String, expected: String) {
-    val githubRegex = Regex("""^(?:https://github\.com/|git://github\.com/|git@github\.com:)(?<owner>[^/]+)/(?<repo>[^/]+?)(?:\.git)?$""")
-    val matchResult = githubRegex.matchEntire(origin)
-    val repoKey = matchResult?.let {
-      val owner = it.groups["owner"]?.value ?: ""
-      val repo = it.groups["repo"]?.value?.removeSuffix(".git") ?: ""
-      "$owner/$repo"
-    } ?: "rahulsom/nothing"
+  fun `getHostedRepoInfo parses various Git URL formats correctly`(
+    origin: String,
+    expectedHost: String,
+    expectedOwner: String,
+    expectedName: String
+  ) {
+    val project = ProjectBuilder.builder().build()
+    project.plugins.apply(WaenaRootPlugin::class.java)
 
-    assertThat(repoKey).isEqualTo(expected)
+    val repo = WaenaPublishedPlugin().getHostedRepoInfo(project, origin)
+
+    assertThat(repo.host).isEqualTo(expectedHost)
+    assertThat(repo.repo.owner).isEqualTo(expectedOwner)
+    assertThat(repo.repo.name).isEqualTo(expectedName)
+    assertThat(repo.repo.toString()).isEqualTo("$expectedOwner/$expectedName")
   }
 
   @Test
-  fun `regex patterns return fallback for non-GitHub URLs`() {
-    val origin = "https://bitbucket.org/owner/repo.git"
+  fun `getHostedRepoInfo parses non-GitHub URLs correctly`() {
+    val project = ProjectBuilder.builder().build()
+    project.plugins.apply(WaenaRootPlugin::class.java)
 
-    val githubRegex = Regex("""^(?:https://github\.com/|git://github\.com/|git@github\.com:)(?<owner>[^/]+)/(?<repo>[^/]+?)(?:\.git)?$""")
-    val matchResult = githubRegex.matchEntire(origin)
-    val repoKey = matchResult?.let {
-      val owner = it.groups["owner"]?.value ?: ""
-      val repo = it.groups["repo"]?.value?.removeSuffix(".git") ?: ""
-      "$owner/$repo"
-    } ?: "rahulsom/nothing"
+    val repo = WaenaPublishedPlugin().getHostedRepoInfo(project, "https://bitbucket.org/owner/repo.git")
 
-    assertThat(repoKey).isEqualTo("rahulsom/nothing")
+    assertThat(repo.host).isEqualTo("bitbucket.org")
+    assertThat(repo.repo.owner).isEqualTo("owner")
+    assertThat(repo.repo.name).isEqualTo("repo")
+    assertThat(repo.repo.toString()).isEqualTo("owner/repo")
   }
 }
