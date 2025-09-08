@@ -1,5 +1,7 @@
 package com.github.rahulsom.waena
 
+import nebula.plugin.contacts.Contact
+import nebula.plugin.contacts.ContactsExtension
 import nebula.plugin.info.scm.ScmInfoPlugin
 import nebula.plugin.release.ReleasePlugin
 import org.gradle.api.Plugin
@@ -10,6 +12,7 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
+import org.gradle.kotlin.dsl.delegateClosureOf
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.plugins.signing.SigningExtension
@@ -94,6 +97,17 @@ class WaenaPublishedPlugin : Plugin<Project> {
 
   private fun configurePom(project: Project, waenaExtension: WaenaExtension) {
     val repoKey = getHostedRepoInfo(project)
+
+    project.afterEvaluate {
+      val contactsExtension = project.extensions.getByType<ContactsExtension>()
+      if (contactsExtension.people.isEmpty()) {
+        contactsExtension.addPerson("${repoKey.repo.owner}@noreply.github.com", delegateClosureOf<Contact> {
+          moniker(repoKey.repo.owner)
+          roles("owner")
+          github("https://${repoKey.host}/${repoKey.repo.owner}")
+        })
+      }
+    }
 
     project.plugins.withType(MavenPublishPlugin::class.java).configureEach {
       val publishing = project.extensions.getByType<PublishingExtension>()
