@@ -141,7 +141,17 @@ class WaenaPublishedPlugin : Plugin<Project> {
     val originUrl = origin ?: scmInfoPlugin.findProvider(project).calculateOrigin(project)
 
     val hostedRepoRegex =
-      Regex("^(?:https?://|git://|git@)(?<host>[^/:]+)[:/](?<owner>[^/]+)/(?<repo>[^/]+?)(?:.git)?$")
+      Regex("""
+        ^                               # Start of the string
+        (?:https?://|git://|git@)       # Match the protocol (http, https, git) or git@
+        (?<host>[^/:]+)                 # Match the host (e.g., github.com)
+        [/:]                            # Match either : or /
+        (?<owner>[^/]+)                 # Match the owner (user or organization)
+        /                               # Match the / separator
+        (?<repo>[^/]+?)                 # Match the repository name (non-greedy)
+        (?:.git)?                       # Optionally match the .git suffix
+        $                               # End of the string
+        """, RegexOption.COMMENTS)
     val matchResult = hostedRepoRegex.matchEntire(originUrl)
     val (host, repo) = matchResult?.let {
       val host = it.groups["host"]?.value ?: ""
