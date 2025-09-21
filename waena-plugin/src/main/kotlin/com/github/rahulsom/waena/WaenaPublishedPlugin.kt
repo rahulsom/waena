@@ -98,15 +98,13 @@ class WaenaPublishedPlugin : Plugin<Project> {
   private fun configurePom(project: Project, waenaExtension: WaenaExtension) {
     val repoKey = getHostedRepoInfo(project)
 
-    project.afterEvaluate {
-      val contactsExtension = project.extensions.getByType<ContactsExtension>()
-      if (contactsExtension.people.isEmpty()) {
-        contactsExtension.addPerson("${repoKey.repo.owner}@noreply.github.com", delegateClosureOf<Contact> {
-          moniker(repoKey.repo.owner)
-          roles("owner")
-          github("https://${repoKey.host}/${repoKey.repo.owner}")
-        })
-      }
+    val contactsExtension = project.rootProject.extensions.getByType<ContactsExtension>()
+    if (contactsExtension.people.isEmpty()) {
+      contactsExtension.addPerson("${repoKey.repo.owner}@noreply.github.com", delegateClosureOf<Contact> {
+        moniker(repoKey.repo.owner)
+        roles("owner")
+        github("https://${repoKey.host}/${repoKey.repo.owner}")
+      })
     }
 
     project.plugins.withType(MavenPublishPlugin::class.java).configureEach {
