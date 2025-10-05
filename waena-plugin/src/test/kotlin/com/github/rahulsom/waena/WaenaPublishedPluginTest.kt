@@ -80,4 +80,33 @@ class WaenaPublishedPluginTest {
     assertThat(repo.repo.name).isEqualTo("repo")
     assertThat(repo.repo.toString()).isEqualTo("owner/repo")
   }
+
+  @ParameterizedTest
+  @CsvSource(
+    "'rahulsom/waena', 'scm:git:git://github.com/rahulsom/waena.git', 'scm:git:git@github.com:rahulsom/waena.git', 'https://github.com/rahulsom/waena'",
+    "'owner/repo', 'scm:git:git://github.com/owner/repo.git', 'scm:git:git@github.com:owner/repo.git', 'https://github.com/owner/repo'"
+  )
+  fun `SCM connection URLs are formatted correctly`(
+    repoPath: String,
+    expectedConnection: String,
+    expectedDeveloperConnection: String,
+    expectedUrl: String
+  ) {
+    val rootProject = ProjectBuilder.builder().build()
+    rootProject.plugins.apply(WaenaRootPlugin::class.java)
+
+    val submodule = ProjectBuilder.builder().withParent(rootProject).build()
+    submodule.plugins.apply(WaenaPublishedPlugin::class.java)
+
+    // Mock git origin to return a URL with the specified repo path
+    val origin = "https://github.com/$repoPath.git"
+    val repoKey = WaenaPublishedPlugin().getHostedRepoInfo(submodule, origin)
+
+    // Verify SCM connection format uses git:// protocol
+    assertThat("scm:git:git://github.com/${repoKey.repo}.git").isEqualTo(expectedConnection)
+    // Verify developer connection format uses SSH
+    assertThat("scm:git:git@github.com:${repoKey.repo}.git").isEqualTo(expectedDeveloperConnection)
+    // Verify URL format
+    assertThat("https://github.com/${repoKey.repo}").isEqualTo(expectedUrl)
+  }
 }

@@ -121,8 +121,8 @@ class WaenaPublishedPlugin : Plugin<Project> {
             }
           }
           scm {
-            connection.set("scm:git:https://github.com/${repoKey.repo}")
-            developerConnection.set("scm:git:ssh://github.com/${repoKey.repo}.git")
+            connection.set("scm:git:git://github.com/${repoKey.repo}.git")
+            developerConnection.set("scm:git:git@github.com:${repoKey.repo}.git")
             url.set("https://github.com/${repoKey.repo}")
           }
           issueManagement {
