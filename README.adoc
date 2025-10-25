@@ -14,19 +14,19 @@ image:https://img.shields.io/gradle-plugin-portal/v/com.github.rahulsom.waena.ro
 
 This needs to be applied only to the root project.
 
-[source,groovy]
+[source,kotlin]
 ----
 plugins {
   id("com.github.rahulsom.waena.root").version("<VERSION>")
 }
 
 allprojects {
-  group = 'TODO'
+  group = "TODO"
 }
 
 contacts {
     validateEmails = true
-    'todo@noreply.github.com' {
+    with(addPerson("todo@noreply.github.com")) {
         moniker("To Do")
         roles("owner")
         github("https://github.com/todo")
@@ -40,7 +40,7 @@ image:https://img.shields.io/gradle-plugin-portal/v/com.github.rahulsom.waena.pu
 
 This needs to be applied to each module in the project that needs to be published.
 
-[source,groovy]
+[source,kotlin]
 ----
 plugins {
   id("com.github.rahulsom.waena.published").version("<VERSION>")
