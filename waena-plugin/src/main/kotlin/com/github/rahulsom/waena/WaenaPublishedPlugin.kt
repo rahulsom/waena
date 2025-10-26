@@ -100,11 +100,11 @@ class WaenaPublishedPlugin : Plugin<Project> {
 
     val contactsExtension = project.rootProject.extensions.getByType<ContactsExtension>()
     if (contactsExtension.people.isEmpty()) {
-      contactsExtension.addPerson("${repoKey.repo.owner}@noreply.github.com", delegateClosureOf<Contact> {
+      with(contactsExtension.addPerson("${repoKey.repo.owner}@noreply.github.com")) {
         moniker(repoKey.repo.owner)
         roles("owner")
         github("https://${repoKey.host}/${repoKey.repo.owner}")
-      })
+      }
     }
 
     project.plugins.withType(MavenPublishPlugin::class.java).configureEach {
