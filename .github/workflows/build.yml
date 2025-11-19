@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        jdk: ${{ github.event_name == 'pull_request' && fromJSON('["17", "21"]') || fromJSON('["17"]') }}
+        jdk: ${{ github.event_name == 'pull_request' && fromJSON('["17", "21", "25"]') || fromJSON('["17"]') }}
 
     steps:
       - uses: actions/checkout@v5
