@@ -55,7 +55,7 @@ class WaenaPluginFunctionalTest {
 
     @JvmStatic
     fun testParameters(): Stream<Arguments> {
-      val gradleVersion = listOf(null, "9.0.0")
+      val gradleVersion = listOf(null, "9.0.0", "9.1.0", "9.2.1")
       val configUrlPairs = listOf(
         Pair(null, CENTRAL),
         Pair("Central", CENTRAL),
@@ -84,8 +84,8 @@ class WaenaPluginFunctionalTest {
     gradleVersion: String?,
     @TempDir projectDir: File
   ) {
-    val waenaConfig = if (testName == null) "" else "waena { publishMode.set(WaenaExtension.PublishMode.$testName) }"
-    runTest(waenaConfig, task, containsTasks, urls, gradleVersion, projectDir)
+    val waenaConfig = testName?.let { "waena { publishMode.set(WaenaExtension.PublishMode.$it) }" }
+    runTest(waenaConfig ?: "", task, containsTasks, urls, gradleVersion, projectDir)
   }
 
   fun runTest(
