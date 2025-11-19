@@ -1,6 +1,9 @@
+import com.adarshr.gradle.testlogger.theme.ThemeType
+
 plugins {
   `kotlin-dsl`
   alias(libs.plugins.gradlePublish)
+  alias(libs.plugins.testLogger)
 }
 
 repositories {
@@ -47,4 +50,13 @@ rootProject.tasks.getByName("final").dependsOn(project.tasks.getByName("publishP
 
 tasks.withType<Test>() {
   useJUnitPlatform()
+}
+
+testlogger {
+  theme = if (System.getProperty("idea.active") == "true") ThemeType.PLAIN_PARALLEL else ThemeType.MOCHA_PARALLEL
+  slowThreshold = 5000
+
+  showPassed = true
+  showSkipped = false
+  showFailed = true
 }
