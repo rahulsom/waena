@@ -20,7 +20,7 @@ jobs:
         jdk: ${{ github.event_name == 'pull_request' && fromJSON('["17", "21", "25"]') || fromJSON('["17"]') }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: gradle/actions/wrapper-validation@v5
 
