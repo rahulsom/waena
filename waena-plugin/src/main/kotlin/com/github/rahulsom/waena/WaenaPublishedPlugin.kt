@@ -1,7 +1,8 @@
 package com.github.rahulsom.waena
 
-import nebula.plugin.contacts.Contact
 import nebula.plugin.contacts.ContactsExtension
+import nebula.plugin.info.InfoBrokerPlugin
+import nebula.plugin.info.InfoPlugin
 import nebula.plugin.info.scm.ScmInfoPlugin
 import nebula.plugin.release.ReleasePlugin
 import org.gradle.api.Plugin
@@ -12,7 +13,6 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
-import org.gradle.kotlin.dsl.delegateClosureOf
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.plugins.signing.SigningExtension
@@ -25,6 +25,7 @@ class WaenaPublishedPlugin : Plugin<Project> {
     target.plugins.apply(SigningPlugin::class.java)
     target.plugins.apply(ReleasePlugin::class.java)
     target.plugins.apply(NebulaMavenPublishPlugin::class.java)
+    target.plugins.apply(InfoPlugin::class.java)
     target.plugins.withType(JavaBasePlugin::class.java) {
       val javaPluginExtension = target.extensions.getByType(JavaPluginExtension::class.java)
       javaPluginExtension.withJavadocJar()
@@ -67,6 +68,11 @@ class WaenaPublishedPlugin : Plugin<Project> {
     target.tasks.withType(AbstractArchiveTask::class.java).configureEach {
       isPreserveFileTimestamps = false
       isReproducibleFileOrder = true
+    }
+
+    target.afterEvaluate {
+      val infoPlugin = target.plugins.findPlugin(InfoBrokerPlugin::class.java)
+      infoPlugin!!.add("Waena-Version", WaenaPublishedPlugin::class.java.getPackage().implementationVersion ?: "unknown")
     }
   }
 
