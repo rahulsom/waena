@@ -19,7 +19,7 @@ dependencies {
   implementation(libs.nexusPublish)
   implementation(libs.taskTree)
   implementation(libs.jreleaser)
-  implementation("nebula.info:nebula.info.gradle.plugin:11.4.1")
+  implementation(libs.nebulaInfo)
 
   testImplementation(libs.bundles.junit)
   testImplementation(libs.assertJ)

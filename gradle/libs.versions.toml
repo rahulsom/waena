@@ -1,6 +1,7 @@
 [versions]
 assertJ = "3.27.6"
 gradleInfo = "16.0.0"
+nebulaInfo = "11.4.1"
 gradlePublish = "2.0.0"
 jgit = "7.+"
 jreleaser = "1.21.0"
@@ -18,6 +19,7 @@ testLogger = "4.0.0"
 [libraries]
 assertJ = { module = "org.assertj:assertj-core", version.ref = "assertJ" }
 gradleInfo = { module = "com.netflix.nebula:gradle-info-plugin", version.ref = "gradleInfo" }
+nebulaInfo = { module = "nebula.info:nebula.info.gradle.plugin", version.ref = "nebulaInfo" }
 jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
 jreleaser = { module = "org.jreleaser:org.jreleaser.gradle.plugin", version.ref = "jreleaser" }
 junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
