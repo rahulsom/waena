@@ -34,22 +34,22 @@ class WaenaPluginFunctionalTest {
     fun buildGradleScript(waenaConfig: String = ""): String {
       // language=groovy
       return """
-            import com.github.rahulsom.waena.WaenaExtension
-            import groovy.json.JsonBuilder
-            plugins {
-                id('com.github.rahulsom.waena.root')
-                id('com.github.rahulsom.waena.published')
-            }
-            $waenaConfig
-            task('showconfig') {
-              doLast {
-                println(new JsonBuilder([
-                  nexusUrl: nexusPublishing.repositories.getByName('sonatype').nexusUrl.get().toString(),
-                  snapshotRepositoryUrl: nexusPublishing.repositories.getByName('sonatype').snapshotRepositoryUrl.get().toString()
-                ]))
-                println(project.extensions.getByType(WaenaExtension).toJson())
-              }
-            }
+        import com.github.rahulsom.waena.WaenaExtension
+        import groovy.json.JsonBuilder
+        plugins {
+            id('com.github.rahulsom.waena.root')
+            id('com.github.rahulsom.waena.published')
+        }
+        $waenaConfig
+        task('showconfig') {
+          doLast {
+            println(new JsonBuilder([
+              nexusUrl: nexusPublishing.repositories.getByName('sonatype').nexusUrl.get().toString(),
+              snapshotRepositoryUrl: nexusPublishing.repositories.getByName('sonatype').snapshotRepositoryUrl.get().toString()
+            ]))
+            println(project.extensions.getByType(WaenaExtension).toJson())
+          }
+        }
         """
     }
 
@@ -107,8 +107,8 @@ class WaenaPluginFunctionalTest {
     projectDir.resolve("build.gradle").writeText(buildGradleScript(waenaConfig))
     projectDir.resolve(".gitignore").writeText(
       """
-            build/
-            .gradle/
+        build/
+        .gradle/
         """.trimIndent()
     )
     git.add().addFilepattern(".").call()
