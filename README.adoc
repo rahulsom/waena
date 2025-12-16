@@ -93,5 +93,6 @@ Under the hood, this uses several other plugins and ties them all together such 
 * link:https://plugins.gradle.org/plugin/nebula.maven-publish[nebula.maven-publish]
 * link:https://plugins.gradle.org/plugin/nebula.contacts[nebula.contacts]
 * link:https://plugins.gradle.org/plugin/nebula.info[nebula.info]
-* link:https://plugins.gradle.org/plugin/io.codearte.nexus-staging[nexus-staging]
-* link:https://plugins.gradle.org/plugin/de.marcphilipp.nexus-publish[nexus-publish]
+* link:https://plugins.gradle.org/plugin/io.github.gradle-nexus.publish-plugin[nexus-publish]
+* link:https://plugins.gradle.org/plugin/com.dorongold.task-tree[task-tree]
+* link:https://plugins.gradle.org/plugin/org.jreleaser[jreleaser]
