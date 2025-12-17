@@ -1,17 +1,20 @@
 package com.github.rahulsom.waena
 
 import com.github.rahulsom.waena.WaenaRootPlugin.Companion.CENTRAL
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.transport.URIish
 import org.gradle.testkit.runner.GradleRunner
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.io.File
+import java.util.jar.JarFile
 import java.util.stream.Stream
 
 /**
@@ -154,5 +157,47 @@ class WaenaPluginFunctionalTest {
     showConfigRunner.withArguments("showconfig")
     val showConfigResult = showConfigRunner.build().output
     return showConfigResult
+  }
+
+  @Test
+  fun `built JAR contains Waena-Version manifest entry`(@TempDir projectDir: File) {
+    Git.init().setDirectory(projectDir).call()
+    val git = Git.open(projectDir)
+    git.repository.config.setString("user", null, "name", "John Doe")
+    git.repository.config.setString("user", null, "email", "john.doe@example.com")
+
+    projectDir.resolve("settings.gradle").writeText("rootProject.name = 'test-project'")
+    projectDir.resolve("build.gradle").writeText(
+      """
+      plugins {
+        id('java')
+        id('com.github.rahulsom.waena.root')
+        id('com.github.rahulsom.waena.published')
+      }
+      group = 'com.example'
+      version = '1.0.0'
+      """.trimIndent()
+    )
+
+    projectDir.resolve("src/main/java").mkdirs()
+    projectDir.resolve("src/main/java/Example.java").writeText("public class Example {}")
+
+    projectDir.resolve(".gitignore").writeText("build/\n.gradle/\n")
+    git.add().addFilepattern(".").call()
+    git.commit().setMessage("Initial commit").call()
+    git.remoteAdd().setName("origin").setUri(URIish("https://github.com/rahulsom/nothing.git")).call()
+
+    GradleRunner.create()
+      .withPluginClasspath()
+      .withProjectDir(projectDir)
+      .withArguments("jar")
+      .forwardOutput()
+      .build()
+
+    val jarFile = projectDir.resolve("build/libs/test-project-1.0.0.jar")
+    JarFile(jarFile).use { jar ->
+      val manifest = jar.manifest
+      assertThat(manifest.mainAttributes.getValue("Waena-Version")).isNotNull().isNotEqualTo("unknown")
+    }
   }
 }
