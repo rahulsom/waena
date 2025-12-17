@@ -1,16 +1,16 @@
 package com.github.rahulsom.waena
 
+import nebula.plugin.info.InfoBrokerPlugin
 import nebula.plugin.info.InfoPlugin
 import nebula.plugin.publishing.maven.MavenPublishPlugin
 import nebula.plugin.release.ReleasePlugin
 import org.assertj.core.api.Assertions.assertThat
+import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.plugins.signing.SigningPlugin
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-
-
 
 class WaenaPublishedPluginTest {
   @Test
@@ -31,6 +31,24 @@ class WaenaPublishedPluginTest {
 
     val rootPlugins = rootProject.plugins
     assertThat(rootPlugins.find { it is InfoPlugin }).isNotNull()
+  }
+
+  @Test
+  fun `plugin adds Waena-Version to InfoBrokerPlugin`() {
+    val rootProject = ProjectBuilder.builder().build()
+    rootProject.plugins.apply(WaenaRootPlugin::class.java)
+
+    val submodule = ProjectBuilder.builder().withParent(rootProject).build()
+    submodule.plugins.apply(WaenaPublishedPlugin::class.java)
+
+    // Trigger afterEvaluate callbacks
+    (submodule as ProjectInternal).evaluate()
+
+    val infoBroker = submodule.plugins.findPlugin(InfoBrokerPlugin::class.java)
+    val manifest = infoBroker!!.buildNonChangingManifest()
+
+    assertThat(manifest).containsKey("Waena-Version")
+    assertThat(manifest["Waena-Version"]).isNotEqualTo("unknown")
   }
 
   @ParameterizedTest

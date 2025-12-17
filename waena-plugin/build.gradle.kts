@@ -6,6 +6,10 @@ plugins {
   alias(libs.plugins.testLogger)
 }
 
+java {
+  withSourcesJar()
+}
+
 repositories {
   mavenCentral()
   gradlePluginPortal()
@@ -47,9 +51,39 @@ gradlePlugin {
   vcsUrl.set("https://github.com/rahulsom/waena.git")
 }
 
+val resourcesDir = project.layout.buildDirectory.dir("generated-src/main/resources").get().asFile
+
+sourceSets {
+  main {
+    resources {
+      srcDir(resourcesDir)
+    }
+  }
+}
+
+tasks.register("createVersionFile") {
+  outputs.dir(resourcesDir)
+  inputs.property("version", project.version.toString())
+  doLast {
+    val outputDir = resourcesDir
+    outputDir.mkdirs()
+    val versionFile = outputDir.resolve("waena-version.properties")
+    versionFile.writeText("waena.version=${project.version}")
+  }
+}
+
+project.tasks.named("processResources") {
+  dependsOn("createVersionFile")
+}
+
+project.tasks.named("sourcesJar") {
+  dependsOn("createVersionFile")
+  inputs.dir(resourcesDir)
+}
+
 rootProject.tasks.getByName("final").dependsOn(project.tasks.getByName("publishPlugins"))
 
-tasks.withType<Test>() {
+tasks.withType<Test> {
   useJUnitPlatform()
 }
 

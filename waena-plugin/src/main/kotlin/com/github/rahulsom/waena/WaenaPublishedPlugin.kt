@@ -72,7 +72,9 @@ class WaenaPublishedPlugin : Plugin<Project> {
 
     target.afterEvaluate {
       val infoPlugin = target.plugins.findPlugin(InfoBrokerPlugin::class.java)
-      infoPlugin!!.add("Waena-Version", WaenaPublishedPlugin::class.java.getPackage().implementationVersion ?: "unknown")
+      val properties = Properties()
+      properties.load(WaenaPublishedPlugin::class.java.classLoader.getResourceAsStream("waena-version.properties"))
+      infoPlugin!!.add("Waena-Version", properties["waena.version"] ?: "unknown")
     }
   }
 
