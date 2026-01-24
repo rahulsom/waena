@@ -1,5 +1,5 @@
 [versions]
-assertJ = "3.27.6"
+assertJ = "3.27.7"
 gradleInfo = "16.0.1"
 nebulaInfo = "11.4.1"
 gradlePublish = "2.0.0"
