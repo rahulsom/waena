@@ -22,6 +22,7 @@ class WaenaRootPlugin : Plugin<Project> {
 
   companion object {
     val CENTRAL = Pair("https://central.sonatype.com/repository/maven-snapshots/", "https://central.sonatype.com/api/v1/publisher")
+    const val CONFIGURE_REMOTE_PUBLISHING_PROPERTY = "waenaConfigureRemotePublishing"
   }
 
   override fun apply(target: Project) {
@@ -37,25 +38,37 @@ class WaenaRootPlugin : Plugin<Project> {
     rootProject.plugins.apply(TaskTreePlugin::class.java)
     rootProject.plugins.apply(InfoPlugin::class.java)
     val waenaExtension = rootProject.extensions.create("waena", WaenaExtension::class.java, rootProject)
+    val configureRemotePublishing = shouldConfigureRemotePublishing(rootProject)
 
     rootProject.allprojects.forEach { target ->
       target.plugins.apply(ContactsPlugin::class.java)
     }
 
-    configureNexusPublishPlugin(rootProject, waenaExtension)
+    if (configureRemotePublishing) {
+      configureNexusPublishPlugin(rootProject, waenaExtension)
 
-    rootProject.afterEvaluate {
-      if (!useNexusPublishPlugin(rootProject)) {
-        configureJReleaser(rootProject)
+      rootProject.afterEvaluate {
+        if (!useNexusPublishPlugin(rootProject)) {
+          configureJReleaser(rootProject)
+        }
       }
+    } else {
+      rootProject.logger.info(
+        "Skipping remote publishing configuration. " +
+            "Set -P$CONFIGURE_REMOTE_PUBLISHING_PROPERTY=true to force-enable it."
+      )
     }
   }
 
   private fun Project.configureJReleaser(rootProject: Project) {
     val isSnapshot = rootProject.version.toString().endsWith("-SNAPSHOT")
-    rootProject.tasks.getByPath(":initializeSonatypeStagingRepository").enabled = isSnapshot
-    rootProject.tasks.getByPath(":closeSonatypeStagingRepository").enabled = isSnapshot
-    rootProject.tasks.getByPath(":releaseSonatypeStagingRepository").enabled = isSnapshot
+    listOf(
+      ":initializeSonatypeStagingRepository",
+      ":closeSonatypeStagingRepository",
+      ":releaseSonatypeStagingRepository"
+    ).forEach { taskPath ->
+      rootProject.tasks.findByPath(taskPath)?.enabled = isSnapshot
+    }
     rootProject.allprojects.forEach { project ->
       project.afterEvaluate {
         project.tasks.findByName("publishNebulaPublicationToSonatypeRepository")?.enabled = isSnapshot
@@ -129,6 +142,36 @@ class WaenaRootPlugin : Plugin<Project> {
   private fun useNexusPublishPlugin(rootProject: Project): Boolean {
     val publishMode = rootProject.extensions.getByType<WaenaExtension>().publishMode.get()
     return publishMode != WaenaExtension.PublishMode.Central
+  }
+
+  private fun shouldConfigureRemotePublishing(rootProject: Project): Boolean {
+    rootProject.findProperty(CONFIGURE_REMOTE_PUBLISHING_PROPERTY)?.toString()?.let { configuredValue ->
+      configuredValue.toBooleanStrictOrNull()?.let { return it }
+      rootProject.logger.warn(
+        "Ignoring invalid value '$configuredValue' for $CONFIGURE_REMOTE_PUBLISHING_PROPERTY. " +
+            "Expected true or false."
+      )
+    }
+
+    if (rootProject.gradle.parent != null) {
+      return false
+    }
+
+    val requestedTasks = rootProject.gradle.startParameter.taskNames
+    if (requestedTasks.isEmpty()) {
+      return true
+    }
+    return requestedTasks
+      .map { taskPath -> taskPath.substringAfterLast(':') }
+      .any { taskName ->
+        taskName.equals("snapshot", ignoreCase = true)
+            || taskName.equals("candidate", ignoreCase = true)
+            || taskName.equals("final", ignoreCase = true)
+            || taskName.contains("publish", ignoreCase = true)
+            || taskName.contains("release", ignoreCase = true)
+            || taskName.contains("sonatype", ignoreCase = true)
+            || taskName.contains("jreleaser", ignoreCase = true)
+      }
   }
 
   fun provideUrls(extension: WaenaExtension) = DefaultProvider({

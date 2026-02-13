@@ -57,11 +57,11 @@ class WaenaPublishedPlugin : Plugin<Project> {
 
     if (target.rootProject == target) {
       target.rootProject.tasks.findByPath("release")?.dependsOn(":publish")
-      target.rootProject.tasks.getByPath("closeSonatypeStagingRepository").mustRunAfter(":publish")
+      target.rootProject.tasks.findByPath("closeSonatypeStagingRepository")?.mustRunAfter(":publish")
       target.rootProject.tasks.findByPath("jreleaserDeploy")?.mustRunAfter(":publish")
     } else {
       target.rootProject.tasks.findByPath("release")?.dependsOn(":${target.name}:publish")
-      target.rootProject.tasks.getByPath("closeSonatypeStagingRepository").mustRunAfter(":${target.name}:publish")
+      target.rootProject.tasks.findByPath("closeSonatypeStagingRepository")?.mustRunAfter(":${target.name}:publish")
       target.rootProject.tasks.findByPath("jreleaserDeploy")?.mustRunAfter(":${target.name}:publish")
     }
 
@@ -146,7 +146,7 @@ class WaenaPublishedPlugin : Plugin<Project> {
     val scmInfoPlugin = project.rootProject.plugins.getAt(ScmInfoPlugin::class.java)
     val originUrl = origin ?: scmInfoPlugin.findProvider(project).calculateOrigin(project)
 
-    val hostedRepoRegex =
+    @Suppress("RegExpRepeatedSpace", "RegExpUnexpectedAnchor") val hostedRepoRegex =
       Regex("""
         ^                               # Start of the string
         (?:https?://|git://|git@)       # Match the protocol (http, https, git) or git@
