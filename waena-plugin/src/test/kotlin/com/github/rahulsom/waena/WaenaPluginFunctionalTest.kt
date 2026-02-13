@@ -154,7 +154,7 @@ class WaenaPluginFunctionalTest {
 
   private fun showConfig(projectDir: File, gradleVersion: String?): String? {
     val showConfigRunner = baseRunner(projectDir, gradleVersion)
-    showConfigRunner.withArguments("showconfig")
+    showConfigRunner.withArguments("-P${WaenaRootPlugin.CONFIGURE_REMOTE_PUBLISHING_PROPERTY}=true", "showconfig")
     val showConfigResult = showConfigRunner.build().output
     return showConfigResult
   }

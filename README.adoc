@@ -70,6 +70,24 @@ export ORG_GRADLE_PROJECT_signingKey=???
 export ORG_GRADLE_PROJECT_signingPassword=???
 ----
 
+=== Remote Publishing Setup
+
+Waena does not configure remote Sonatype/JReleaser publishing in included/composite builds by default.
+For standalone builds, it configures remote publishing only when a publishing-related task is requested
+(`snapshot`, `candidate`, `final`, tasks containing `publish`, `release`, `sonatype`, or `jreleaser`).
+This keeps regular `build`/`test` runs and composite builds from eagerly creating remote publishing repositories.
+
+You can override this behavior with a project property:
+
+[source,shell]
+----
+# Force-enable remote publishing setup
+./gradlew -PwaenaConfigureRemotePublishing=true test
+
+# Force-disable remote publishing setup
+./gradlew -PwaenaConfigureRemotePublishing=false final
+----
+
 === Publishing snapshots
 
 [source,shell]
