@@ -105,6 +105,8 @@ class WaenaPluginFunctionalTest {
     val git = Git.open(projectDir)
     git.repository.config.setString("user", null, "name", "John Doe")
     git.repository.config.setString("user", null, "email", "john.doe@example.com")
+    git.repository.config.setBoolean("commit", null, "gpgsign", false)
+    git.repository.config.setBoolean("tag", null, "gpgsign", false)
     projectDir.mkdirs()
     projectDir.resolve("settings.gradle").writeText("")
     projectDir.resolve("build.gradle").writeText(buildGradleScript(waenaConfig))
@@ -165,6 +167,8 @@ class WaenaPluginFunctionalTest {
     val git = Git.open(projectDir)
     git.repository.config.setString("user", null, "name", "John Doe")
     git.repository.config.setString("user", null, "email", "john.doe@example.com")
+    git.repository.config.setBoolean("commit", null, "gpgsign", false)
+    git.repository.config.setBoolean("tag", null, "gpgsign", false)
 
     projectDir.resolve("settings.gradle").writeText("rootProject.name = 'test-project'")
     projectDir.resolve("build.gradle").writeText(
