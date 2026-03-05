@@ -58,7 +58,7 @@ class WaenaPluginFunctionalTest {
 
     @JvmStatic
     fun testParameters(): Stream<Arguments> {
-      val gradleVersion = listOf(null, "9.0.0", "9.1.0", "9.2.1")
+      val gradleVersion = listOf(null, "9.1.0", "9.2.1", "9.4.0")
       val configUrlPairs = listOf(
         Pair(null, CENTRAL),
         Pair("Central", CENTRAL),
