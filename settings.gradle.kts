@@ -6,12 +6,6 @@ develocity {
     buildScan {
         termsOfUseUrl.set("https://gradle.com/terms-of-service")
         termsOfUseAgree.set("yes")
-        buildScanPublished {
-            file("build").mkdirs()
-            file("build/gradle-scan.md").writeText(
-                """Gradle Build Scan - [`${this.buildScanId}`](${this.buildScanUri})"""
-            )
-        }
     }
 }
 
