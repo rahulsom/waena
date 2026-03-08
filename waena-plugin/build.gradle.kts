@@ -1,4 +1,5 @@
 import com.adarshr.gradle.testlogger.theme.ThemeType
+import com.github.rahulsom.waena.CreateVersionFileTask
 
 plugins {
   `kotlin-dsl`
@@ -52,12 +53,12 @@ gradlePlugin {
   vcsUrl.set("https://github.com/rahulsom/waena.git")
 }
 
-val resourcesDir = tasks.named<com.github.rahulsom.waena.CreateVersionFileTask>("createVersionFile").flatMap { it.outputDir }
+val createVersionFileOutputDir = tasks.named<CreateVersionFileTask>("createVersionFile").flatMap { it.outputDir }
 
 sourceSets {
   main {
     resources {
-      srcDir(resourcesDir)
+      srcDir(createVersionFileOutputDir)
     }
   }
 }
@@ -70,8 +71,9 @@ project.tasks.named("sourcesJar").configure {
   dependsOn("createVersionFile")
 }
 
-rootProject.tasks.named("final").configure {
-  dependsOn(tasks.named("publishPlugins"))
+val myPath = project.path
+rootProject.tasks.matching { it.name == "final" }.configureEach {
+  dependsOn(tasks.named("$myPath:publishPlugins"))
 }
 
 tasks.withType<Test> {
