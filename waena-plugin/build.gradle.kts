@@ -4,6 +4,7 @@ plugins {
   `kotlin-dsl`
   alias(libs.plugins.gradlePublish)
   alias(libs.plugins.testLogger)
+  id("com.github.rahulsom.waena.version-file")
 }
 
 java {
@@ -51,7 +52,7 @@ gradlePlugin {
   vcsUrl.set("https://github.com/rahulsom/waena.git")
 }
 
-val resourcesDir = project.layout.buildDirectory.dir("generated-src/main/resources").get().asFile
+val resourcesDir = tasks.named<com.github.rahulsom.waena.CreateVersionFileTask>("createVersionFile").flatMap { it.outputDir }
 
 sourceSets {
   main {
@@ -61,24 +62,12 @@ sourceSets {
   }
 }
 
-tasks.register("createVersionFile") {
-  outputs.dir(resourcesDir)
-  inputs.property("version", project.version.toString())
-  doLast {
-    val outputDir = resourcesDir
-    outputDir.mkdirs()
-    val versionFile = outputDir.resolve("waena-version.properties")
-    versionFile.writeText("waena.version=${project.version}")
-  }
-}
-
 project.tasks.named("processResources") {
   dependsOn("createVersionFile")
 }
 
 project.tasks.named("sourcesJar") {
   dependsOn("createVersionFile")
-  inputs.dir(resourcesDir)
 }
 
 rootProject.tasks.getByName("final").dependsOn(project.tasks.getByName("publishPlugins"))

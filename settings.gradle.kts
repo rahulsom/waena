@@ -16,4 +16,5 @@ develocity {
 }
 
 rootProject.name = "waena"
+includeBuild("gradle/plugins")
 include("waena-plugin")
