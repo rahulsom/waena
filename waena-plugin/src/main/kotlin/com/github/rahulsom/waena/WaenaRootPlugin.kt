@@ -1,8 +1,11 @@
 package com.github.rahulsom.waena
 
 import com.dorongold.gradle.tasktree.TaskTreePlugin
+import io.github.gradlenexus.publishplugin.CloseNexusStagingRepository
+import io.github.gradlenexus.publishplugin.InitializeNexusStagingRepository
 import io.github.gradlenexus.publishplugin.NexusPublishExtension
 import io.github.gradlenexus.publishplugin.NexusPublishPlugin
+import io.github.gradlenexus.publishplugin.ReleaseNexusStagingRepository
 import nebula.plugin.contacts.ContactsPlugin
 import nebula.plugin.info.InfoPlugin
 import nebula.plugin.release.ReleasePlugin
@@ -10,6 +13,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.internal.provider.DefaultProvider
+import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.plugins.signing.SigningPlugin
 import org.jreleaser.gradle.plugin.JReleaserExtension
@@ -129,6 +133,22 @@ class WaenaRootPlugin : Plugin<Project> {
     nexusPublishExtension.connectTimeout.unsetConvention().convention(Duration.ofMinutes(3))
     nexusPublishExtension.clientTimeout.unsetConvention().convention(Duration.ofMinutes(3))
     nexusPublishExtension.transitionCheckOptions.delayBetween.unsetConvention().convention(Duration.ofSeconds(30))
+
+    val notCompatibleReason = "gradle-nexus-publish-plugin tasks are not compatible with configuration cache"
+    rootProject.tasks.withType(InitializeNexusStagingRepository::class.java).configureEach {
+      notCompatibleWithConfigurationCache(notCompatibleReason)
+    }
+    rootProject.tasks.withType(CloseNexusStagingRepository::class.java).configureEach {
+      notCompatibleWithConfigurationCache(notCompatibleReason)
+    }
+    rootProject.tasks.withType(ReleaseNexusStagingRepository::class.java).configureEach {
+      notCompatibleWithConfigurationCache(notCompatibleReason)
+    }
+    rootProject.allprojects {
+      tasks.withType(PublishToMavenRepository::class.java).configureEach {
+        notCompatibleWithConfigurationCache(notCompatibleReason)
+      }
+    }
 
     listOf("candidate", "final").forEach {
       rootProject.tasks.findByPath(it)?.let { r ->
