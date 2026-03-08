@@ -71,7 +71,7 @@ project.tasks.named("sourcesJar").configure {
 }
 
 rootProject.tasks.named("final").configure {
-  dependsOn("publishPlugins")
+  dependsOn(tasks.named("publishPlugins"))
 }
 
 tasks.withType<Test> {
