@@ -62,15 +62,17 @@ sourceSets {
   }
 }
 
-project.tasks.named("processResources") {
+project.tasks.named("processResources").configure {
   dependsOn("createVersionFile")
 }
 
-project.tasks.named("sourcesJar") {
+project.tasks.named("sourcesJar").configure {
   dependsOn("createVersionFile")
 }
 
-rootProject.tasks.getByName("final").dependsOn(project.tasks.getByName("publishPlugins"))
+rootProject.tasks.named("final").configure {
+  dependsOn("publishPlugins")
+}
 
 tasks.withType<Test> {
   useJUnitPlatform()
