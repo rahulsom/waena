@@ -3,6 +3,7 @@ assertJ = "3.27.7"
 gradleInfo = "16.1.0"
 nebulaInfo = "11.4.1"
 gradlePublish = "2.1.0"
+pluginCompatibility = "1.0.0"
 jgit = "7.+"
 jreleaser = "1.23.0"
 junit = "6.0.3"
@@ -39,5 +40,6 @@ junit = ["junitApi", "junitJupiter", "junitParams", "junitPlatformLauncher"]
 
 [plugins]
 gradlePublish = { id = "com.gradle.plugin-publish", version.ref = "gradlePublish" }
+pluginCompatibility = { id = "org.gradle.plugin-compatibility", version.ref = "pluginCompatibility" }
 nebulaRelease = { id = "nebula.release", version.ref = "nebulaRelease" }
 testLogger = { id = "com.adarshr.test-logger", version.ref = "testLogger" }

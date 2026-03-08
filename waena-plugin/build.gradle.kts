@@ -3,6 +3,7 @@ import com.adarshr.gradle.testlogger.theme.ThemeType
 plugins {
   `kotlin-dsl`
   alias(libs.plugins.gradlePublish)
+  alias(libs.plugins.pluginCompatibility)
   alias(libs.plugins.testLogger)
   id("com.github.rahulsom.waena.version-file")
 }
