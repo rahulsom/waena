@@ -70,9 +70,14 @@ project.tasks.named("sourcesJar").configure {
   dependsOn("createVersionFile")
 }
 
-// Lazy dependency so publishPlugins (created by plugin-publish) exists when resolved (avoids config order / config cache issues)
-rootProject.tasks.matching { it.name == "final" }.configureEach {
-  dependsOn(provider { tasks.named("publishPlugins").get() })
+listOf("final", "candidate").forEach { taskName ->
+  rootProject.tasks.named(taskName).configure {
+    dependsOn(tasks.named("publishPlugins"))
+  }
+}
+
+tasks.named("publishPlugins").configure {
+  mustRunAfter("check")
 }
 
 tasks.withType<Test> {
