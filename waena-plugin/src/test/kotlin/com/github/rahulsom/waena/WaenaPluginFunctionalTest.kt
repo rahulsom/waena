@@ -149,6 +149,122 @@ class WaenaPluginFunctionalTest {
     return showConfigResult
   }
 
+  private fun initMultiModuleProject(projectDir: File): Git {
+    Git.init().setDirectory(projectDir).call()
+    val git = Git.open(projectDir)
+    git.repository.config.setString("user", null, "name", "John Doe")
+    git.repository.config.setString("user", null, "email", "john.doe@example.com")
+    git.repository.config.setBoolean("commit", null, "gpgsign", false)
+    git.repository.config.setBoolean("tag", null, "gpgsign", false)
+
+    projectDir.resolve("settings.gradle").writeText(
+      """
+      rootProject.name = 'multi-test'
+      include 'sub-a', 'sub-b'
+      """.trimIndent()
+    )
+    projectDir.resolve("build.gradle").writeText(
+      """
+      plugins {
+        id('com.github.rahulsom.waena.root')
+      }
+      """.trimIndent()
+    )
+
+    listOf("sub-a", "sub-b").forEach { sub ->
+      val subDir = projectDir.resolve(sub)
+      subDir.mkdirs()
+      subDir.resolve("build.gradle").writeText(
+        """
+        plugins {
+          id('java')
+          id('com.github.rahulsom.waena.published')
+        }
+        group = 'com.example'
+        """.trimIndent()
+      )
+      subDir.resolve("src/main/java").mkdirs()
+      subDir.resolve("src/main/java/Dummy.java").writeText("public class Dummy {}")
+      subDir.resolve("src/test/java").mkdirs()
+      subDir.resolve("src/test/java/DummyTest.java").writeText(
+        """
+        import org.junit.jupiter.api.Test;
+        class DummyTest {
+          @Test void dummy() {}
+        }
+        """.trimIndent()
+      )
+    }
+
+    projectDir.resolve(".gitignore").writeText("build/\n.gradle/\n")
+    git.add().addFilepattern(".").call()
+    git.commit().setMessage("Initial commit").call()
+    git.remoteAdd().setName("origin").setUri(URIish("https://github.com/rahulsom/nothing.git")).call()
+    return git
+  }
+
+  private fun extractTaskOrder(dryRunOutput: String): List<String> {
+    return dryRunOutput.lines()
+      .filter { it.startsWith("> Task ") || it.startsWith(":") }
+      .map { line ->
+        line.removePrefix("> Task ").split(" ")[0]
+      }
+  }
+
+  @Test
+  fun `all verification tasks run before any publish task in multi-module build`(@TempDir projectDir: File) {
+    initMultiModuleProject(projectDir)
+
+    val result = baseRunner(projectDir, null)
+      .withArguments("check", "publishToMavenLocal", "publishNebulaPublicationToLocalRepository", "--dry-run")
+      .build()
+
+    val tasks = extractTaskOrder(result.output)
+
+    val verificationTasks = tasks.filter { it.contains("test") || it.contains("Test") || it.contains("check") || it.contains("Check") }
+    val publishTasks = tasks.filter { it.contains("publish", ignoreCase = true) && !it.contains("generate", ignoreCase = true) }
+
+    assertThat(verificationTasks).isNotEmpty()
+    assertThat(publishTasks).isNotEmpty()
+
+    val lastVerificationIndex = verificationTasks.maxOf { tasks.indexOf(it) }
+    val firstPublishIndex = publishTasks.minOf { tasks.indexOf(it) }
+
+    assertThat(lastVerificationIndex)
+      .describedAs(
+        "Last verification task (${tasks[lastVerificationIndex]}) at index $lastVerificationIndex " +
+            "should be before first publish task (${tasks[firstPublishIndex]}) at index $firstPublishIndex"
+      )
+      .isLessThan(firstPublishIndex)
+  }
+
+  @Test
+  fun `publish tasks still run when a verification task is excluded`(@TempDir projectDir: File) {
+    initMultiModuleProject(projectDir)
+
+    val result = baseRunner(projectDir, null)
+      .withArguments("check", "publishNebulaPublicationToLocalRepository", "-x", ":sub-a:check", "--dry-run")
+      .build()
+
+    val tasks = extractTaskOrder(result.output)
+
+    assertThat(tasks).anyMatch { it.contains("publishNebulaPublicationToLocalRepository") }
+    assertThat(tasks).noneMatch { it == ":sub-a:check" }
+
+    val verificationTasks = tasks.filter { it.contains("test") || it.contains("Test") || it.contains("check") || it.contains("Check") }
+    val publishTasks = tasks.filter { it.contains("publish", ignoreCase = true) && !it.contains("generate", ignoreCase = true) }
+
+    if (verificationTasks.isNotEmpty() && publishTasks.isNotEmpty()) {
+      val lastVerificationIndex = verificationTasks.maxOf { tasks.indexOf(it) }
+      val firstPublishIndex = publishTasks.minOf { tasks.indexOf(it) }
+      assertThat(lastVerificationIndex)
+        .describedAs(
+          "Remaining verification tasks should still precede publish tasks"
+        )
+        .isLessThan(firstPublishIndex)
+    }
+  }
+
   @Test
   fun `built JAR contains Waena-Version manifest entry`(@TempDir projectDir: File) {
     Git.init().setDirectory(projectDir).call()
