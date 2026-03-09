@@ -151,7 +151,7 @@ class WaenaPublishedPlugin : Plugin<Project> {
 
   fun getHostedRepoInfo(project: Project, origin: String? = null): HostedRepo {
     val scmInfoPlugin = project.rootProject.plugins.getAt(ScmInfoPlugin::class.java)
-    val originUrl = origin ?: scmInfoPlugin.findProvider(project).calculateOrigin(project)
+    val originUrl = origin ?: scmInfoPlugin.findProvider(project).origin().getOrElse("")
 
     @Suppress("RegExpRepeatedSpace", "RegExpUnexpectedAnchor") val hostedRepoRegex =
       Regex("""
