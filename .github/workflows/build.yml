@@ -19,7 +19,15 @@ jobs:
         jdk: ${{ github.event_name == 'pull_request' && fromJSON('["17", "21", "25"]') || fromJSON('["17"]') }}
 
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout (release)
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # full history so current commit has its tag for nebula-release useLastTag
+
+      - name: Checkout (non-release)
+        if: github.event_name != 'push' || !startsWith(github.ref, 'refs/tags/v')
+        uses: actions/checkout@v6
 
       - uses: gradle/actions/wrapper-validation@v5
 
