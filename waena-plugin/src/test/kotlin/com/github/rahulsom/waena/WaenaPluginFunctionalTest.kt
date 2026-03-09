@@ -31,23 +31,24 @@ class WaenaPluginFunctionalTest {
     private val SNAPSHOT_TASKS = setOf(LOCAL_PUBLISH, SONATYPE_PUBLISH)
 
     fun buildGradleScript(waenaConfig: String = ""): String {
-      return """
+      @Language("kotlin")
+      val script = """
         import com.github.rahulsom.waena.WaenaExtension
-        import groovy.json.JsonBuilder
+
         plugins {
-            id('com.github.rahulsom.waena.root')
-            id('com.github.rahulsom.waena.published')
+            id("com.github.rahulsom.waena.root")
+            id("com.github.rahulsom.waena.published")
         }
         $waenaConfig
-        task('showconfig') {
+        tasks.register("showconfig") {
           doLast {
-            println(new JsonBuilder([
-              publishMode: project.extensions.getByType(WaenaExtension).publishMode.get().toString()
-            ]))
-            println(project.extensions.getByType(WaenaExtension).toJson())
+            val ext = project.extensions.getByType(WaenaExtension::class.java)
+            println("{\"publishMode\":\"${'$'}{ext.publishMode.get()}\"}") 
+            println(ext.toJson())
           }
         }
         """
+      return script
     }
 
     @JvmStatic
@@ -92,17 +93,11 @@ class WaenaPluginFunctionalTest {
     val allPossibleTasks = setOf(LOCAL_PUBLISH, SONATYPE_PUBLISH, JRELEASER_DEPLOY)
     val doesNotContainTasks = allPossibleTasks - containsTasks
     val softly = SoftAssertions()
-    Git.init().setDirectory(projectDir).call()
-    val git = Git.open(projectDir)
-    git.repository.config.setString("user", null, "name", "John Doe")
-    git.repository.config.setString("user", null, "email", "john.doe@example.com")
-    git.repository.config.setBoolean("commit", null, "gpgsign", false)
-    git.repository.config.setBoolean("tag", null, "gpgsign", false)
+    val git = initGitRepo(projectDir)
     projectDir.mkdirs()
-    projectDir.resolve("settings.gradle").writeText("")
-    projectDir.resolve("build.gradle").writeText(buildGradleScript(waenaConfig))
-    projectDir.resolve(".gitignore").writeText(
-      """
+    projectDir.resolve("settings.gradle.kts").writeText("")
+    projectDir.resolve("build.gradle.kts").writeText(buildGradleScript(waenaConfig))
+    projectDir.resolve(".gitignore").writeText(/* language=ignore */ """
         build/
         .gradle/
         """.trimIndent()
@@ -149,54 +144,54 @@ class WaenaPluginFunctionalTest {
     return showConfigResult
   }
 
-  private fun initMultiModuleProject(projectDir: File): Git {
+  private fun initGitRepo(projectDir: File): Git {
     Git.init().setDirectory(projectDir).call()
     val git = Git.open(projectDir)
     git.repository.config.setString("user", null, "name", "John Doe")
     git.repository.config.setString("user", null, "email", "john.doe@example.com")
     git.repository.config.setBoolean("commit", null, "gpgsign", false)
     git.repository.config.setBoolean("tag", null, "gpgsign", false)
+    return git
+  }
 
-    projectDir.resolve("settings.gradle").writeText(
-      """
-      rootProject.name = 'multi-test'
-      include 'sub-a', 'sub-b'
-      """.trimIndent()
-    )
-    projectDir.resolve("build.gradle").writeText(
-      """
+  private fun initMultiModuleProject(projectDir: File): Git {
+    val git = initGitRepo(projectDir)
+
+    projectDir.resolve("settings.gradle.kts").writeText(/* language=kotlin */ """
+      rootProject.name = "multi-test"
+      include("sub-a", "sub-b")
+    """.trimIndent())
+    projectDir.resolve("build.gradle.kts").writeText(/* language=kotlin */ """
       plugins {
-        id('com.github.rahulsom.waena.root')
+        id("com.github.rahulsom.waena.root")
       }
-      """.trimIndent()
-    )
+    """.trimIndent())
 
     listOf("sub-a", "sub-b").forEach { sub ->
       val subDir = projectDir.resolve(sub)
       subDir.mkdirs()
-      subDir.resolve("build.gradle").writeText(
-        """
+      subDir.resolve("build.gradle.kts").writeText(/* language=kotlin */ """
         plugins {
-          id('java')
-          id('com.github.rahulsom.waena.published')
+          id("java")
+          id("com.github.rahulsom.waena.published")
         }
-        group = 'com.example'
-        """.trimIndent()
-      )
+        group = "com.example"
+      """.trimIndent())
       subDir.resolve("src/main/java").mkdirs()
-      subDir.resolve("src/main/java/Dummy.java").writeText("public class Dummy {}")
+      subDir.resolve("src/main/java/Dummy.java").writeText(/* language=java */ "public class Dummy {}")
       subDir.resolve("src/test/java").mkdirs()
-      subDir.resolve("src/test/java/DummyTest.java").writeText(
-        """
+      subDir.resolve("src/test/java/DummyTest.java").writeText(/* language=java */ """
         import org.junit.jupiter.api.Test;
         class DummyTest {
           @Test void dummy() {}
         }
-        """.trimIndent()
-      )
+      """.trimIndent())
     }
 
-    projectDir.resolve(".gitignore").writeText("build/\n.gradle/\n")
+    projectDir.resolve(".gitignore").writeText(/* language=ignore */ """
+      build/
+      .gradle/
+    """.trimIndent())
     git.add().addFilepattern(".").call()
     git.commit().setMessage("Initial commit").call()
     git.remoteAdd().setName("origin").setUri(URIish("https://github.com/rahulsom/nothing.git")).call()
@@ -267,30 +262,29 @@ class WaenaPluginFunctionalTest {
 
   @Test
   fun `built JAR contains Waena-Version manifest entry`(@TempDir projectDir: File) {
-    Git.init().setDirectory(projectDir).call()
-    val git = Git.open(projectDir)
-    git.repository.config.setString("user", null, "name", "John Doe")
-    git.repository.config.setString("user", null, "email", "john.doe@example.com")
-    git.repository.config.setBoolean("commit", null, "gpgsign", false)
-    git.repository.config.setBoolean("tag", null, "gpgsign", false)
+    val git = initGitRepo(projectDir)
 
-    projectDir.resolve("settings.gradle").writeText("rootProject.name = 'test-project'")
-    projectDir.resolve("build.gradle").writeText(
-      """
+    projectDir.resolve("settings.gradle.kts").writeText(/* language=kotlin */ """
+      rootProject.name = "test-project"
+    """.trimIndent())
+    projectDir.resolve("build.gradle.kts").writeText(/* language=kotlin */ """
       plugins {
-        id('java')
-        id('com.github.rahulsom.waena.root')
-        id('com.github.rahulsom.waena.published')
+        id("java")
+        id("com.github.rahulsom.waena.root")
+        id("com.github.rahulsom.waena.published")
       }
-      group = 'com.example'
-      version = '1.0.0'
-      """.trimIndent()
-    )
+      group = "com.example"
+      version = "1.0.0"
+    """.trimIndent())
 
     projectDir.resolve("src/main/java").mkdirs()
-    projectDir.resolve("src/main/java/Example.java").writeText("public class Example {}")
+    projectDir.resolve("src/main/java/Example.java").writeText(/* language=java */ "public class Example {}")
 
-    projectDir.resolve(".gitignore").writeText("build/\n.gradle/\n")
+    projectDir.resolve(".gitignore").writeText(/* language=ignore */ """
+      build/
+      .gradle/
+      """.trimIndent()
+    )
     git.add().addFilepattern(".").call()
     git.commit().setMessage("Initial commit").call()
     git.remoteAdd().setName("origin").setUri(URIish("https://github.com/rahulsom/nothing.git")).call()
