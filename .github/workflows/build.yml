@@ -23,6 +23,7 @@ jobs:
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         uses: actions/checkout@v6
         with:
+          ref: ${{ github.ref }}
           fetch-depth: 0  # full history so current commit has its tag for nebula-release useLastTag
 
       - name: Checkout (non-release)
@@ -44,6 +45,14 @@ jobs:
       - name: Build (Main)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: ./gradlew build --stacktrace --parallel --scan
+
+      - name: Debug (release git state)
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo "github.ref=${{ github.ref }}"
+          git log -1 --oneline
+          git describe --tags --exact-match 2>/dev/null || git describe --tags || true
+          git tag -l 'v*' | tail -3
 
       - name: Build (Release)
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
