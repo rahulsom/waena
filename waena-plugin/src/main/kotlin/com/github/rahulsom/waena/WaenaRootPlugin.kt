@@ -97,10 +97,6 @@ class WaenaRootPlugin : Plugin<Project> {
       }
     }
 
-    rootProject.tasks.withType(AbstractJReleaserTask::class.java).configureEach {
-      notCompatibleWithConfigurationCache("JReleaser tasks use Task.project at execution time")
-    }
-
     val jreleaserOutputDir = rootProject.layout.buildDirectory.dir("jreleaser")
     rootProject.tasks.findByName("jreleaserDeploy")?.doFirst {
       jreleaserOutputDir.get().asFile.mkdirs()
