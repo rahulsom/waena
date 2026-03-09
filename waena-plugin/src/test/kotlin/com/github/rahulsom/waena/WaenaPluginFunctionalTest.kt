@@ -1,6 +1,5 @@
 package com.github.rahulsom.waena
 
-import com.github.rahulsom.waena.WaenaRootPlugin.Companion.CENTRAL
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.eclipse.jgit.api.Git
@@ -17,25 +16,21 @@ import java.io.File
 import java.util.jar.JarFile
 import java.util.stream.Stream
 
-/**
- * A simple functional test for the 'com.github.rahulsom.waena.greeting' plugin.
- */
 class WaenaPluginFunctionalTest {
 
   companion object {
     private const val SNAPSHOT = "snapshot"
     private const val FINAL = "final"
+    private const val CANDIDATE = "candidate"
 
-    private const val SONATYPE_1_PUBLISH = "publishNebulaPublicationToSonatypeRepository"
-    private const val SONATYPE_2_CLOSE = "closeSonatypeStagingRepository"
     private const val LOCAL_PUBLISH = "publishNebulaPublicationToLocalRepository"
-    private const val SONATYPE_3_RELEASE = "releaseSonatypeStagingRepository"
+    private const val SONATYPE_PUBLISH = "publishNebulaPublicationToSonatypeRepository"
+    private const val JRELEASER_DEPLOY = "jreleaserDeploy"
 
-    private val ALL_TASKS = setOf(LOCAL_PUBLISH, SONATYPE_1_PUBLISH, SONATYPE_2_CLOSE, SONATYPE_3_RELEASE)
-    private val PUBLISH_TASKS = setOf(LOCAL_PUBLISH, SONATYPE_1_PUBLISH)
+    private val RELEASE_TASKS = setOf(LOCAL_PUBLISH, JRELEASER_DEPLOY)
+    private val SNAPSHOT_TASKS = setOf(LOCAL_PUBLISH, SONATYPE_PUBLISH)
 
     fun buildGradleScript(waenaConfig: String = ""): String {
-      // language=groovy
       return """
         import com.github.rahulsom.waena.WaenaExtension
         import groovy.json.JsonBuilder
@@ -47,8 +42,7 @@ class WaenaPluginFunctionalTest {
         task('showconfig') {
           doLast {
             println(new JsonBuilder([
-              nexusUrl: nexusPublishing.repositories.getByName('sonatype').nexusUrl.get().toString(),
-              snapshotRepositoryUrl: nexusPublishing.repositories.getByName('sonatype').snapshotRepositoryUrl.get().toString()
+              publishMode: project.extensions.getByType(WaenaExtension).publishMode.get().toString()
             ]))
             println(project.extensions.getByType(WaenaExtension).toJson())
           }
@@ -59,47 +53,44 @@ class WaenaPluginFunctionalTest {
     @JvmStatic
     fun testParameters(): Stream<Arguments> {
       val gradleVersion = listOf(null, "9.1.0", "9.2.1", "9.4.0")
-      val configUrlPairs = listOf(
-        Pair(null, CENTRAL),
-        Pair("Central", CENTRAL),
-      )
+      val publishModes = listOf(null, "Central")
       val taskTasksPairs = listOf(
-        Pair(SNAPSHOT, PUBLISH_TASKS),
-        Pair(FINAL, ALL_TASKS)
+        Pair(SNAPSHOT, SNAPSHOT_TASKS),
+        Pair(CANDIDATE, RELEASE_TASKS),
+        Pair(FINAL, RELEASE_TASKS)
       )
       return gradleVersion.flatMap { gv ->
-        configUrlPairs.flatMap { (publishMode, urls) ->
+        publishModes.flatMap { publishMode ->
           taskTasksPairs.map { (task, tasks) ->
-            arguments(publishMode, task, tasks, urls, gv)
+            arguments(publishMode, task, tasks, gv)
           }
         }
       }.stream()
     }
   }
 
-  @ParameterizedTest(name = "gradle({4}) publishMode({0}) task({1})")
+  @ParameterizedTest(name = "gradle({3}) publishMode({0}) task({1})")
   @MethodSource("testParameters")
   fun testWaenaConfiguration(
     testName: String?,
     task: String,
     containsTasks: Set<String>,
-    urls: Pair<String, String>,
     gradleVersion: String?,
     @TempDir projectDir: File
   ) {
     val waenaConfig = testName?.let { "waena { publishMode.set(WaenaExtension.PublishMode.$it) }" }
-    runTest(waenaConfig ?: "", task, containsTasks, urls, gradleVersion, projectDir)
+    runTest(waenaConfig ?: "", task, containsTasks, gradleVersion, projectDir)
   }
 
   fun runTest(
     @Language("kotlin") waenaConfig: String,
     task: String,
     containsTasks: Set<String>,
-    urls: Pair<String, String>,
     gradleVersion: String?,
     @TempDir projectDir: File
   ) {
-    val doesNotContainTasks = ALL_TASKS - containsTasks
+    val allPossibleTasks = setOf(LOCAL_PUBLISH, SONATYPE_PUBLISH, JRELEASER_DEPLOY)
+    val doesNotContainTasks = allPossibleTasks - containsTasks
     val softly = SoftAssertions()
     Git.init().setDirectory(projectDir).call()
     val git = Git.open(projectDir)
@@ -125,7 +116,6 @@ class WaenaPluginFunctionalTest {
 
     println(showConfigResult + "\n" + taskTree)
 
-    // Verify the result
     containsTasks.forEach { t ->
       softly.assertThat(taskTree).contains(t)
     }
@@ -133,9 +123,7 @@ class WaenaPluginFunctionalTest {
       softly.assertThat(taskTree).doesNotContain(t)
     }
 
-    // Verify the result
-    softly.assertThat(showConfigResult!!.split("\n").first { it.contains("snapshotRepositoryUrl") })
-      .isEqualTo("""{"nexusUrl":"${urls.second}","snapshotRepositoryUrl":"${urls.first}"}""")
+    softly.assertThat(showConfigResult).contains("\"publishMode\":\"Central\"")
     softly.assertAll()
   }
 
