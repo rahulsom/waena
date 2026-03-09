@@ -22,7 +22,6 @@ dependencies {
   implementation(libs.nebulaPublish)
   implementation(libs.nebulaContacts)
   implementation(libs.gradleInfo)
-  implementation(libs.nexusPublish)
   implementation(libs.taskTree)
   implementation(libs.jreleaser)
   implementation(libs.nebulaInfo)

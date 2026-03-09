@@ -41,27 +41,36 @@ class WaenaPublishedPlugin : Plugin<Project> {
     }
 
     val publishingExtension = target.extensions.findByType<PublishingExtension>()!!
-    val rootProject = target.rootProject
-    val waenaExtension = rootProject.extensions.getByType(WaenaExtension::class.java)
+    val waenaExtension = target.rootProject.extensions.getByType(WaenaExtension::class.java)
+    val isSnapshot = target.version.toString().endsWith("SNAPSHOT")
 
     publishingExtension.repositories.maven {
       name = "local"
       val rootBuildDir = target.rootProject.layout.buildDirectory.get()
       val releasesRepoUrl = "$rootBuildDir/repos/releases"
       val snapshotsRepoUrl = "$rootBuildDir/repos/snapshots"
-      val repoUrl = if (target.version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
+      val repoUrl = if (isSnapshot) snapshotsRepoUrl else releasesRepoUrl
       url = target.file(repoUrl).toURI()
+    }
+
+    if (isSnapshot && waenaExtension.publishMode.get() == WaenaExtension.PublishMode.Central) {
+      publishingExtension.repositories.maven {
+        name = "sonatype"
+        url = target.uri(WaenaRootPlugin.CENTRAL.first)
+        credentials {
+          username = target.rootProject.findProperty("sonatypeUsername") as String? ?: ""
+          password = target.rootProject.findProperty("sonatypePassword") as String? ?: ""
+        }
+      }
     }
 
     configurePom(target, waenaExtension)
 
     if (target.rootProject == target) {
       target.rootProject.tasks.findByPath("release")?.dependsOn(":publish")
-      target.rootProject.tasks.findByPath("closeSonatypeStagingRepository")?.mustRunAfter(":publish")
       target.rootProject.tasks.findByPath("jreleaserDeploy")?.mustRunAfter(":publish")
     } else {
       target.rootProject.tasks.findByPath("release")?.dependsOn(":${target.name}:publish")
-      target.rootProject.tasks.findByPath("closeSonatypeStagingRepository")?.mustRunAfter(":${target.name}:publish")
       target.rootProject.tasks.findByPath("jreleaserDeploy")?.mustRunAfter(":${target.name}:publish")
     }
 
@@ -70,12 +79,10 @@ class WaenaPublishedPlugin : Plugin<Project> {
       isReproducibleFileOrder = true
     }
 
-    target.afterEvaluate {
-      val infoPlugin = target.plugins.findPlugin(InfoBrokerPlugin::class.java)
-      val properties = Properties()
-      properties.load(WaenaPublishedPlugin::class.java.classLoader.getResourceAsStream("waena-version.properties"))
-      infoPlugin!!.add("Waena-Version", properties["waena.version"] ?: "unknown")
-    }
+    val infoPlugin = target.plugins.findPlugin(InfoBrokerPlugin::class.java)
+    val properties = Properties()
+    properties.load(WaenaPublishedPlugin::class.java.classLoader.getResourceAsStream("waena-version.properties"))
+    infoPlugin!!.add("Waena-Version", properties["waena.version"] ?: "unknown")
   }
 
   private fun signProject(project: Project) {

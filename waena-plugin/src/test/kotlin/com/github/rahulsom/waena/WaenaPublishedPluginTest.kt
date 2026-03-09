@@ -5,7 +5,6 @@ import nebula.plugin.info.InfoPlugin
 import nebula.plugin.publishing.maven.MavenPublishPlugin
 import nebula.plugin.release.ReleasePlugin
 import org.assertj.core.api.Assertions.assertThat
-import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.plugins.signing.SigningPlugin
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.Test
@@ -40,9 +39,6 @@ class WaenaPublishedPluginTest {
 
     val submodule = ProjectBuilder.builder().withParent(rootProject).build()
     submodule.plugins.apply(WaenaPublishedPlugin::class.java)
-
-    // Trigger afterEvaluate callbacks
-    (submodule as ProjectInternal).evaluate()
 
     val infoBroker = submodule.plugins.findPlugin(InfoBrokerPlugin::class.java)
     val manifest = infoBroker!!.buildNonChangingManifest()
