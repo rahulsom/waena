@@ -8,6 +8,8 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.internal.provider.DefaultProvider
+import org.gradle.api.publish.plugins.PublishingPlugin
+import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.plugins.signing.SigningPlugin
 import org.jreleaser.gradle.plugin.JReleaserExtension
@@ -49,6 +51,25 @@ class WaenaRootPlugin : Plugin<Project> {
         "Skipping remote publishing configuration. " +
             "Set -P$CONFIGURE_REMOTE_PUBLISHING_PROPERTY=true to force-enable it."
       )
+    }
+
+    enforceVerificationBeforePublishing(rootProject)
+  }
+
+  private fun enforceVerificationBeforePublishing(rootProject: Project) {
+    rootProject.gradle.projectsEvaluated {
+      val verificationTasks = rootProject.allprojects.flatMap { project ->
+        project.tasks.matching { task ->
+          task.group.equals(LifecycleBasePlugin.VERIFICATION_GROUP, ignoreCase = true)
+        }
+      }
+      rootProject.allprojects.forEach { project ->
+        project.tasks.matching { task ->
+          task.group.equals(PublishingPlugin.PUBLISH_TASK_GROUP, ignoreCase = true)
+        }.configureEach {
+          mustRunAfter(verificationTasks)
+        }
+      }
     }
   }
 
