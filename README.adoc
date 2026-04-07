@@ -2,7 +2,8 @@
 
 image:https://img.shields.io/github/commits-since/rahulsom/waena/latest?style=for-the-badge[GitHub commits since latest release, link="https://github.com/rahulsom/waena/releases/new"]
 
-Gradle plugins for publishing to Maven Central
+Waena is a set of Gradle plugins for publishing to Maven Central.
+_Waena_ is Hawaiian for _central_.
 
 == Setup
 
