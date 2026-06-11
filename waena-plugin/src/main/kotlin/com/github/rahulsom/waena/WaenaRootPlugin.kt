@@ -79,12 +79,14 @@ class WaenaRootPlugin : Plugin<Project> {
 
     jreleaser.project.description.set("Waena Bundle")
     jreleaser.project.copyright.set("2025")
+    jreleaser.project.languages.java.groupId.set(rootProject.provider { rootProject.group.toString() })
     jreleaser.deploy {
       maven {
         mavenCentral {
           create("sonatype") {
             active.set(Active.ALWAYS)
             url.set(CENTRAL.second)
+            namespace.set(rootProject.provider { rootProject.group.toString() })
             stagingRepository("build/repos/releases")
             if (rootProject.hasProperty("sonatypeUsername")) {
               username.set(rootProject.property("sonatypeUsername") as String)
