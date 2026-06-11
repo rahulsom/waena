@@ -198,6 +198,34 @@ class WaenaPluginFunctionalTest {
     return git
   }
 
+  @Test
+  fun `jreleaser configuration is valid when group is set`(@TempDir projectDir: File) {
+    val git = initGitRepo(projectDir)
+    projectDir.resolve("settings.gradle.kts").writeText("")
+    projectDir.resolve("build.gradle.kts").writeText("""
+      import com.github.rahulsom.waena.WaenaExtension
+      plugins {
+          id("com.github.rahulsom.waena.root")
+          id("com.github.rahulsom.waena.published")
+      }
+      group = "com.example"
+      waena { publishMode.set(WaenaExtension.PublishMode.Central) }
+    """.trimIndent())
+    projectDir.resolve(".gitignore").writeText("build/\n.gradle/\n")
+    git.add().addFilepattern(".").call()
+    git.commit().setMessage("Initial commit").call()
+    git.remoteAdd().setName("origin").setUri(URIish("https://github.com/rahulsom/nothing.git")).call()
+
+    // jreleaserConfig validates the full config including GitHub token (unavailable in tests),
+    // so we expect a build failure but assert our specific fields are not the cause.
+    val result = baseRunner(projectDir, null)
+      .withArguments("-P${WaenaRootPlugin.CONFIGURE_REMOTE_PUBLISHING_PROPERTY}=true", "jreleaserConfig")
+      .buildAndFail()
+
+    assertThat(result.output).doesNotContain("project.java.groupId must not be blank")
+    assertThat(result.output).doesNotContain("deploy.maven.mavenCentral.sonatype.namespace must not be blank")
+  }
+
   private fun extractTaskOrder(dryRunOutput: String): List<String> {
     return dryRunOutput.lines()
       .filter { it.startsWith("> Task ") || it.startsWith(":") }
