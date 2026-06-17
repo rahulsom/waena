@@ -43,6 +43,7 @@ class WaenaPublishedPlugin : Plugin<Project> {
     val publishingExtension = target.extensions.findByType<PublishingExtension>()!!
     val waenaExtension = target.rootProject.extensions.getByType(WaenaExtension::class.java)
     val isSnapshot = target.version.toString().endsWith("SNAPSHOT")
+    val publishModes = waenaExtension.resolvedPublishModes()
 
     publishingExtension.repositories.maven {
       name = "local"
@@ -53,13 +54,27 @@ class WaenaPublishedPlugin : Plugin<Project> {
       url = target.file(repoUrl).toURI()
     }
 
-    if (isSnapshot && waenaExtension.publishMode.get() == WaenaExtension.PublishMode.Central) {
+    if (isSnapshot && WaenaExtension.PublishMode.Central in publishModes) {
       publishingExtension.repositories.maven {
         name = "sonatype"
         url = target.uri(WaenaRootPlugin.CENTRAL.first)
         credentials {
           username = target.rootProject.findProperty("sonatypeUsername") as String? ?: ""
           password = target.rootProject.findProperty("sonatypePassword") as String? ?: ""
+        }
+      }
+    }
+
+    if (WaenaExtension.PublishMode.GitHub in publishModes) {
+      val repoKey = getHostedRepoInfo(target)
+      publishingExtension.repositories.maven {
+        name = "githubPackages"
+        url = target.uri("https://maven.pkg.github.com/${repoKey.repo}")
+        credentials {
+          username = target.rootProject.findProperty("githubPackagesUsername") as String?
+            ?: System.getenv("GITHUB_ACTOR") ?: ""
+          password = target.rootProject.findProperty("githubPackagesPassword") as String?
+            ?: System.getenv("GITHUB_TOKEN") ?: ""
         }
       }
     }

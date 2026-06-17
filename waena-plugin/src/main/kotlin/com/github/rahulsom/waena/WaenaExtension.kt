@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
 
 open class WaenaExtension(project: Project) {
   enum class License(val license: String, val url: String) {
@@ -26,11 +27,24 @@ open class WaenaExtension(project: Project) {
      * Publish to Maven Central via Sonatype Portal
      */
     Central,
+
+    /**
+     * Publish to GitHub Packages
+     */
+    GitHub,
   }
 
   val license: Property<License> = project.objects
     .property(License::class.java)
     .convention(License.Apache2)
+
+  val publishModes: SetProperty<PublishMode> = project.objects
+    .setProperty(PublishMode::class.java)
+
+  @Deprecated(
+    message = "Use publishModes instead",
+    replaceWith = ReplaceWith("publishModes.set(setOf(mode))")
+  )
   val publishMode: Property<PublishMode> = project.objects
     .property(PublishMode::class.java)
     .convention(PublishMode.Central)
@@ -40,8 +54,14 @@ open class WaenaExtension(project: Project) {
     return ObjectMapper().writeValueAsString(
       mapOf<String, Any>(
         "license" to license.get(),
-        "publishMode" to publishMode.get()
+        "publishModes" to resolvedPublishModes()
       )
     )
+  }
+
+  internal fun resolvedPublishModes(): Set<PublishMode> {
+    val explicit = publishModes.getOrElse(emptySet())
+    @Suppress("DEPRECATION")
+    return explicit.ifEmpty { setOf(publishMode.get()) }
   }
 }
