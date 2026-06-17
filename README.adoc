@@ -2,7 +2,8 @@
 
 image:https://img.shields.io/github/commits-since/rahulsom/waena/latest?style=for-the-badge[GitHub commits since latest release, link="https://github.com/rahulsom/waena/releases/new"]
 
-Waena is a set of Gradle plugins for publishing to Maven Central.
+Waena is a set of Gradle plugins for publishing JVM artifacts.
+It supports publishing to Maven Central and GitHub Packages.
 _Waena_ is Hawaiian for _central_.
 
 == Setup
@@ -49,11 +50,13 @@ plugins {
 
 description = "TODO"
 
-// Optional (to customize license/publishMode)
-// Right now there's only one working publish mode - Central
+// Optional — customize license and publish targets
 waena {
     license.set(WaenaExtension.License.Apache2)
-    publishMode.set(WaenaExtension.PublishMode.Central)
+    // Publish to Maven Central only (default)
+    publishModes.set(setOf(WaenaExtension.PublishMode.Central))
+    // Or publish to both Maven Central and GitHub Packages
+    // publishModes.set(setOf(WaenaExtension.PublishMode.Central, WaenaExtension.PublishMode.GitHub))
 }
 ----
 
@@ -61,7 +64,9 @@ waena {
 
 === Environment Variables
 
-Set these 4 environment variables
+==== Maven Central
+
+Set these 4 environment variables for publishing to Maven Central:
 
 [source,shell]
 ----
@@ -70,6 +75,41 @@ export ORG_GRADLE_PROJECT_sonatypePassword=???
 export ORG_GRADLE_PROJECT_signingKey=???
 export ORG_GRADLE_PROJECT_signingPassword=???
 ----
+
+==== GitHub Packages
+
+GitHub Packages uses the `GITHUB_ACTOR` and `GITHUB_TOKEN` environment variables, which are
+automatically provided in GitHub Actions.
+For local publishing, set them explicitly:
+
+[source,shell]
+----
+export GITHUB_ACTOR=<your-github-username>
+export GITHUB_TOKEN=<a-personal-access-token-with-write:packages-scope>
+----
+
+Alternatively, you can set them as Gradle project properties:
+
+[source,shell]
+----
+export ORG_GRADLE_PROJECT_githubPackagesUsername=???
+export ORG_GRADLE_PROJECT_githubPackagesPassword=???
+----
+
+==== GitHub Actions permissions
+
+When publishing to GitHub Packages from a GitHub Actions workflow, the job needs `packages: write`:
+
+[source,yaml]
+----
+jobs:
+  build:
+    permissions:
+      packages: write
+----
+
+If you use a reusable workflow, the permission must be declared in that workflow's `jobs.<job>.permissions` block —
+permissions in the calling workflow do not grant additional permissions to the reusable workflow.
 
 === Remote Publishing Setup
 
@@ -95,6 +135,9 @@ You can override this behavior with a project property:
 ----
 ./gradlew snapshot
 ----
+
+Snapshots are published to Sonatype snapshots when `Central` is in `publishModes`.
+GitHub Packages does not receive snapshots — only candidates and finals are published there.
 
 === Publishing releases
 
