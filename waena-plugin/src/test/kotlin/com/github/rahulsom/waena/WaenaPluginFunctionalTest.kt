@@ -106,27 +106,26 @@ class WaenaPluginFunctionalTest {
     git.commit().setMessage("Initial commit").call()
     git.remoteAdd().setName("origin").setUri(URIish("https://github.com/rahulsom/nothing.git")).call()
 
-    val taskTree = getTaskTree(task, projectDir, gradleVersion)
-    val showConfigResult = showConfig(projectDir, gradleVersion)
+    val output = runGradleBuild(task, projectDir, gradleVersion)
 
-    println(showConfigResult + "\n" + taskTree)
+    println(output)
 
     containsTasks.forEach { t ->
-      softly.assertThat(taskTree).contains(t)
+      softly.assertThat(output).contains(t)
     }
     doesNotContainTasks.forEach { t ->
-      softly.assertThat(taskTree).doesNotContain(t)
+      softly.assertThat(output).doesNotContain(t)
     }
 
-    softly.assertThat(showConfigResult).contains("\"publishMode\":\"Central\"")
     softly.assertAll()
   }
 
-  private fun getTaskTree(task: String, projectDir: File, gradleVersion: String?): String? {
+  // taskTree blocks execution of all other tasks, so we only run it with the release task.
+  // publishMode defaults and configuration are already covered by WaenaExtensionTest.
+  private fun runGradleBuild(task: String, projectDir: File, gradleVersion: String?): String {
     val runner = baseRunner(projectDir, gradleVersion)
     runner.withArguments(task, "taskTree")
-    val result = runner.build().output
-    return result
+    return runner.build().output
   }
 
   private fun baseRunner(projectDir: File, gradleVersion: String?): GradleRunner {
@@ -135,13 +134,6 @@ class WaenaPluginFunctionalTest {
       runner.withGradleVersion(gradleVersion)
     }
     return runner
-  }
-
-  private fun showConfig(projectDir: File, gradleVersion: String?): String? {
-    val showConfigRunner = baseRunner(projectDir, gradleVersion)
-    showConfigRunner.withArguments("-P${WaenaRootPlugin.CONFIGURE_REMOTE_PUBLISHING_PROPERTY}=true", "showconfig")
-    val showConfigResult = showConfigRunner.build().output
-    return showConfigResult
   }
 
   private fun initGitRepo(projectDir: File): Git {
