@@ -37,6 +37,13 @@ jobs:
           distribution: 'zulu'
           java-version: ${{ matrix.jdk }}
 
+      - name: Cache Gradle wrapper distributions
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/wrapper/dists
+          key: gradle-wrapper-dists-${{ hashFiles('waena-plugin/src/test/kotlin/**/*.kt') }}
+          restore-keys: gradle-wrapper-dists-
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
