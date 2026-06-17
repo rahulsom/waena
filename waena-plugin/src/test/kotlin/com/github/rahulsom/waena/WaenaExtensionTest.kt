@@ -11,6 +11,7 @@ class WaenaExtensionTest {
     val project = ProjectBuilder.builder().build()
     val extension = WaenaExtension(project)
     assertThat(extension.license.get()).isEqualTo(WaenaExtension.License.Apache2)
+    @Suppress("DEPRECATION")
     assertThat(extension.publishMode.get()).isEqualTo(WaenaExtension.PublishMode.Central)
   }
 
@@ -23,7 +24,19 @@ class WaenaExtensionTest {
   }
 
   @Test
-  fun `can set publish mode`() {
+  fun `can set publish modes`() {
+    val project = ProjectBuilder.builder().build()
+    val extension = WaenaExtension(project)
+    extension.publishModes.set(setOf(WaenaExtension.PublishMode.Central, WaenaExtension.PublishMode.GitHub))
+    assertThat(extension.publishModes.get()).containsExactlyInAnyOrder(
+      WaenaExtension.PublishMode.Central,
+      WaenaExtension.PublishMode.GitHub,
+    )
+  }
+
+  @Test
+  @Suppress("DEPRECATION")
+  fun `can set publish mode (deprecated)`() {
     val project = ProjectBuilder.builder().build()
     val extension = WaenaExtension(project)
     extension.publishMode.set(WaenaExtension.PublishMode.Central)
@@ -36,6 +49,6 @@ class WaenaExtensionTest {
     val extension = WaenaExtension(project)
     val extensionConfig = ObjectMapper().readValue(extension.toJson(), Map::class.java)
     assertThat(extensionConfig["license"]).isEqualTo(WaenaExtension.License.Apache2.toString())
-    assertThat(extensionConfig["publishMode"]).isEqualTo(WaenaExtension.PublishMode.Central.toString())
+    assertThat(extensionConfig["publishModes"] as List<*>).containsExactly(WaenaExtension.PublishMode.Central.toString())
   }
 }
