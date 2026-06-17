@@ -65,7 +65,7 @@ class WaenaPublishedPlugin : Plugin<Project> {
       }
     }
 
-    if (WaenaExtension.PublishMode.GitHub in publishModes) {
+    if (!isSnapshot && WaenaExtension.PublishMode.GitHub in publishModes) {
       val repoKey = getHostedRepoInfo(target)
       publishingExtension.repositories.maven {
         name = "githubPackages"
