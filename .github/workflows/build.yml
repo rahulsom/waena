@@ -21,14 +21,14 @@ jobs:
     steps:
       - name: Checkout (release)
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0  # full history so current commit has its tag for nebula-release useLastTag
 
       - name: Checkout (non-release)
         if: github.event_name != 'push' || !startsWith(github.ref, 'refs/tags/v')
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - uses: gradle/actions/wrapper-validation@v6
 
