@@ -28,7 +28,7 @@ allprojects {
 
 contacts {
     validateEmails = true
-    with(addPerson("todo@noreply.github.com")) {
+    addPerson("todo@noreply.github.com") {
         moniker("To Do")
         roles("owner")
         github("https://github.com/todo")
