@@ -38,7 +38,7 @@ jobs:
           java-version: ${{ matrix.jdk }}
 
       - name: Cache Gradle wrapper distributions
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.gradle/wrapper/dists
           key: gradle-wrapper-dists-${{ hashFiles('waena-plugin/src/test/kotlin/**/*.kt') }}
