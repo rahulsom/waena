@@ -12,7 +12,7 @@ mockitoKotlin = "6.3.0"
 nebulaContacts = "8.1.0"
 nebulaPublish = "23.1.0"
 nebulaRelease = "21.0.0"
-taskTree = "4.0.1"
+taskTree = "4.0.2"
 testLogger = "4.0.0"
 
 [libraries]
