@@ -19,16 +19,9 @@ jobs:
         jdk: ${{ github.event_name == 'pull_request' && fromJSON('["17", "21", "25"]') || fromJSON('["17"]') }}
 
     steps:
-      - name: Checkout (release)
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
         with:
-          ref: ${{ github.ref }}
           fetch-depth: 0  # full history so current commit has its tag for nebula-release useLastTag
-
-      - name: Checkout (non-release)
-        if: github.event_name != 'push' || !startsWith(github.ref, 'refs/tags/v')
-        uses: actions/checkout@v7
 
       - uses: gradle/actions/wrapper-validation@v6
 
@@ -36,13 +29,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: ${{ matrix.jdk }}
-
-      - name: Cache Gradle wrapper distributions
-        uses: actions/cache@v6
-        with:
-          path: ~/.gradle/wrapper/dists
-          key: gradle-wrapper-dists-${{ hashFiles('waena-plugin/src/test/kotlin/**/*.kt') }}
-          restore-keys: gradle-wrapper-dists-
+          cache: gradle
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
@@ -54,14 +41,6 @@ jobs:
       - name: Build (Main)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: ./gradlew build --stacktrace --parallel --scan
-
-      - name: Debug (release git state)
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-        run: |
-          echo "github.ref=${{ github.ref }}"
-          git log -1 --oneline
-          git describe --tags --exact-match 2>/dev/null || git describe --tags || true
-          git tag -l 'v*' | tail -3
 
       - name: Build (Release)
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
