@@ -2,7 +2,7 @@
 assertJ = "3.27.7"
 gradleInfo = "16.3.0"
 nebulaInfo = "11.4.1"
-gradlePublish = "2.1.1"
+gradlePublish = "2.2.0"
 jgit = "7.+"
 jreleaser = "1.26.0"
 junit = "6.1.3"
