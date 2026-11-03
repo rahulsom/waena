@@ -9,7 +9,7 @@
       "matchManagers": [
         "github-actions"
       ],
-      "pinDigests": true
+      "pinDigests": false
     }
   ]
 }
