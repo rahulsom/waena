@@ -11,7 +11,7 @@ mockito = "5.24.0"
 mockitoKotlin = "6.4.0"
 nebulaContacts = "8.2.0"
 nebulaPublish = "23.2.0"
-nebulaRelease = "21.1.4"
+nebulaRelease = "21.2.0"
 taskTree = "4.0.2"
 testLogger = "4.0.0"
 
