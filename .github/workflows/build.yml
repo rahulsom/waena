@@ -17,6 +17,11 @@ jobs:
       fail-fast: false
       matrix:
         jdk: ${{ github.event_name == 'pull_request' && fromJSON('["17", "21", "25"]') || fromJSON('["17"]') }}
+        gradle: [wrapper, current]
+        exclude:
+          # Gradle 8 does not fully support running on Java 25.
+          - gradle: wrapper
+            jdk: '25'
 
     steps:
       - uses: actions/checkout@v7.0.1
@@ -33,17 +38,19 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6.4.1
+        with:
+          gradle-version: ${{ matrix.gradle }}
 
-      - name: Build (PR)
-        if: github.event_name == 'pull_request'
+      - name: Build with the wrapper
+        if: matrix.gradle == 'wrapper' && !startsWith(github.ref, 'refs/tags/v')
         run: ./gradlew build --stacktrace --parallel --scan
 
-      - name: Build (Main)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: ./gradlew build --stacktrace --parallel --scan
+      - name: Build with the latest stable Gradle
+        if: matrix.gradle == 'current'
+        run: gradle build --stacktrace --parallel --scan
 
       - name: Build (Release)
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        if: matrix.gradle == 'wrapper' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         env:
           GRADLE_PUBLISH_KEY: ${{ secrets.GRADLE_PUBLISH_KEY }}
           GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
