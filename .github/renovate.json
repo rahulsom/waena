@@ -4,7 +4,24 @@
     "config:recommended"
   ],
   "automerge": true,
+  "customDatasources": {
+    "gradle-previous-major": {
+      "defaultRegistryUrlTemplate": "https://services.gradle.org/versions/all",
+      "transformTemplates": [
+        "($major := $number($substringBefore($[current].version, '.')); { \"previousMajor\": $string($major - 1), \"versions\": $ })",
+        "($major := previousMajor; [versions[final and $not(broken) and $substringBefore(version, '.') = $major].{ \"version\": version }])",
+        "{ \"releases\": $, \"sourceUrl\": \"https://github.com/gradle/gradle\" }"
+      ]
+    }
+  },
   "packageRules": [
+    {
+      "description": "Publish with the newest stable release from the previous Gradle major",
+      "matchManagers": [
+        "gradle-wrapper"
+      ],
+      "overrideDatasource": "custom.gradle-previous-major"
+    },
     {
       "matchManagers": [
         "github-actions"
