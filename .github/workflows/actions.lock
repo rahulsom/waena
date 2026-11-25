@@ -9,6 +9,7 @@ workflows:
         - 'gradle/actions@v6.4.1'
     '.github/workflows/codeql.yml':
         - 'actions/checkout@v7.0.1'
+        - 'actions/setup-java@v6.3.0'
         - 'github/codeql-action@v4.39.5'
 dependencies:
     'actions/checkout@v7.0.1':
