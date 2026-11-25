@@ -56,3 +56,18 @@ jobs:
           GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
         run: |
           ./gradlew -Prelease.useLastTag=true build final --stacktrace --scan
+
+  build-result:
+    name: Build result
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ always() }}
+    steps:
+      - name: Check build matrix result
+        env:
+          BUILD_RESULT: ${{ needs.build.result }}
+        run: |
+          if [[ "$BUILD_RESULT" != success ]]; then
+            echo "::error::Build matrix finished with status: $BUILD_RESULT"
+            exit 1
+          fi
